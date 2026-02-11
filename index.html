@@ -1433,7 +1433,8 @@
 <body>
 
   <header id="siteHeader">
-    <a class="logo" href="#">Ts<span>un</span><span class="logo-blush">...it's not like I made this for you</span></a>
+    <a class="logo" href="index.html">Ts<span>un</span><span class="logo-blush">...it's not like I made this for
+        you</span></a>
     <div class="header-right">
       <a href="builder.html"
         style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;border:1px solid var(--border);color:var(--muted);padding:6px 12px;text-decoration:none;transition:all var(--transition);"
@@ -1681,6 +1682,7 @@
       state.page = 0;
       state.selectedCovers.clear();
       state.selectMode = false;
+      coversGrid.innerHTML = '';
       selectModeBtn.textContent = 'Pick covers, I suppose';
       updateSelectionUI();
       renderMeta(manga);
@@ -1746,6 +1748,14 @@
       state.selectMode = !state.selectMode;
       selectModeBtn.textContent = state.selectMode ? 'Stop picking' : 'Pick covers';
       if (!state.selectMode) { state.selectedCovers.clear(); updateSelectionUI(); }
+    });
+
+    clearSelectionBtn.addEventListener('click', () => {
+      state.selectMode = false;
+      selectModeBtn.textContent = 'Pick covers, I suppose';
+      state.selectedCovers.clear();
+      document.querySelectorAll('.cover-card.selected').forEach(card => card.classList.remove('selected'));
+      updateSelectionUI();
     });
 
     function toggleSelectCover(card, idx) {
