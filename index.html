@@ -174,6 +174,7 @@
       position: relative;
       max-width: 560px;
       margin: 0 auto;
+      z-index: 20;
     }
 
     .search-input {
@@ -676,8 +677,14 @@
       border: 1px solid var(--border);
       max-width: 500px;
       width: 100%;
+      max-height: 90vh;
+      /* Prevent modal from hogging screen */
+      overflow-y: auto;
+      /* Allow scrolling within modal */
       padding: 2rem;
       animation: fadeUp 0.25s ease;
+      position: relative;
+      /* For close button positioning */
     }
 
     .modal-title {
@@ -812,13 +819,23 @@
     .genre-carousel {
       display: flex;
       gap: 14px;
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      will-change: transform;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 1rem;
+      /* Space for scrollbar if visible */
+      scrollbar-width: none;
+      /* Firefox */
+    }
+
+    .genre-carousel::-webkit-scrollbar {
+      display: none;
+      /* Chrome/Safari */
     }
 
     .genre-card {
       flex-shrink: 0;
       width: 140px;
+      scroll-snap-align: start;
       cursor: pointer;
       transition: opacity var(--transition);
     }
@@ -1451,8 +1468,9 @@
     <div style="display:flex;gap:10px;align-items:center">
       <span class="toolbar-hint" style="font-size:10px;color:var(--muted);letter-spacing:0.1em">Pick exactly 9. I'm not
         flexible about this.</span>
-      <button class="btn primary" id="buildGridBtn" disabled>Build the 3x3 already</button>
-      <button class="btn danger" id="clearSelectionBtn">Forget all of this</button>
+      <button class="btn primary" id="buildGridBtn" disabled>Build 3x3</button>
+      <button class="btn" id="openInBuilderBtn" disabled>Open in Builder</button>
+      <button class="btn danger" id="clearSelectionBtn">Forget it</button>
     </div>
   </div>
 
@@ -1468,6 +1486,8 @@
 
   <div class="modal-overlay" id="gridModal">
     <div class="modal">
+      <button class="modal-close" id="gridModalClose"
+        style="position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer;">&times;</button>
       <h2 class="modal-title">Your 3x3 Grid</h2>
       <p class="modal-sub">I made it for you. Don't get the wrong idea — it took two seconds.</p>
       <div class="grid-canvas-wrap">
@@ -1509,7 +1529,7 @@
     // ===================== STATE =====================
     const state = {
       theme: 'dark', searchResults: [], currentManga: null, covers: [], displayedCovers: [],
-      perPage: 30, page: 0, totalCovers: 0, selectedCovers: new Set(), selectMode: false,
+      perPage: 50, page: 0, totalCovers: 0, selectedCovers: new Set(), selectMode: false,
       lightboxIndex: 0, genres: ['Action', 'Romance', 'Fantasy', 'Horror', 'Comedy'],
       searchTimeout: null, acIndex: -1
     };
@@ -1550,7 +1570,7 @@
     themeToggle.addEventListener('click', () => {
       state.theme = state.theme === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', state.theme);
-      themeToggle.textContent = state.theme === 'dark' ? 'Too bright' : 'Too dark';
+      themeToggle.textContent = state.theme === 'dark' ? 'Too dark' : 'Too bright';
     });
 
     // ===================== SEARCH =====================
@@ -1679,6 +1699,10 @@
       const count = state.selectedCovers.size;
       toolbarCount.textContent = count;
       buildGridBtn.disabled = count !== 9;
+      // Open in Builder enabled if at least 1 is selected
+      const openBtn = $('openInBuilderBtn');
+      if (openBtn) openBtn.disabled = count === 0;
+
       selectionToolbar.classList.toggle('visible', count > 0);
       document.querySelectorAll('.grid-preview-cell').forEach((cell, i) => cell.classList.toggle('filled', i < count));
     }
@@ -1717,6 +1741,26 @@
       });
     });
 
+    $('openInBuilderBtn')?.addEventListener('click', () => {
+      if (state.selectedCovers.size === 0) return;
+      const indices = Array.from(state.selectedCovers).sort((a, b) => a - b);
+
+      // Convert selection to Builder format
+      const gridData = Array(9).fill(null);
+      indices.forEach((coverIdx, i) => {
+        if (i < 9) {
+          gridData[i] = {
+            id: state.currentManga.mal_id,
+            title: state.currentManga.title,
+            image: state.covers[coverIdx].url
+          };
+        }
+      });
+
+      localStorage.setItem('tsun_current_grid', JSON.stringify(gridData));
+      window.location.href = 'builder.html';
+    });
+
     downloadGrid.addEventListener('click', () => {
       const link = document.createElement('a');
       link.download = `tsun-index-${Date.now()}.png`;
@@ -1725,6 +1769,7 @@
     });
 
     closeModal.onclick = () => gridModal.classList.remove('open');
+    $('gridModalClose').onclick = () => gridModal.classList.remove('open');
 
     // ===================== GENRES & INIT =====================
     async function loadGenres() {
@@ -1733,7 +1778,7 @@
         block.innerHTML = `<h2 class="genre-title">${g}</h2><div class="genre-carousel" id="cat-${g}"></div>`;
         genreBlocks.appendChild(block);
         // Fetch top 5 for demo
-        const res = await fetch(`https://api.jikan.moe/v4/manga?q=&order_by=popularity&limit=5&genres=${g === 'Action' ? 1 : g === 'Romance' ? 22 : 10}`);
+        const res = await fetch(`https://api.jikan.moe/v4/manga?q=&order_by=popularity&limit=5&genres=${g === 'Action' ? 1 : g === 'Romance' ? 22 : g === 'Fantasy' ? 10 : g === 'Horror' ? 14 : 4}`);
         const data = await res.json();
         $(`cat-${g}`).innerHTML = (data.data || []).map(m => `<div class="genre-card"><img src="${m.images.jpg.image_url}"></div>`).join('');
       }
