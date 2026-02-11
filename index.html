@@ -1598,6 +1598,9 @@
       searchTimeout: null, acIndex: -1
     };
 
+    // ===================== CONSTANTS =====================
+    const BLANK_SVG = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22/%3E';
+
     // ===================== BATCH IMAGE LOADER =====================
     // Loads images 5 at a time to respect rate limits and avoid proxy overload
     async function batchLoadImages(imgElements, batchSize = 5, delayMs = 150) {
@@ -1720,7 +1723,7 @@
         const titleStyle = isNSFW ? 'style="color: var(--blush);"' : '';
         return `
     <div class="autocomplete-item" data-idx="${i}">
-      <img class="autocomplete-thumb" src="" style="background:var(--surface2)" alt="">
+      <img class="autocomplete-thumb" src="${BLANK_SVG}" alt="">
       <div class="autocomplete-info"><span class="name" ${titleStyle}>${escHtml(title)}</span></div>
     </div>`;
       }).join('');
@@ -1778,16 +1781,27 @@
       gallerySection.classList.remove('visible');
       galleryLoading.classList.add('visible');
       try {
-        // Fetch covers from MangaDex via proxy
-        const res = await fetch(`${API_BASE_URL || ''}/api/mangadex/cover?manga[]=${manga.id}&limit=100&order[volume]=asc`);
-        const data = await res.json();
-        state.covers = (data.data || []).map((cover, i) => {
-          const raw = `https://uploads.mangadex.org/covers/${manga.id}/${cover.attributes.fileName}`;
-          return {
-            url: `${API_BASE_URL}/api/proxy?url=${encodeURIComponent(raw)}`,
-            volume: cover.attributes.volume || cover.attributes.description || `Cover ${i + 1}`
-          };
-        });
+        // Paginate to fetch ALL covers (MangaDex max 100 per request)
+        let allCovers = [];
+        let offset = 0;
+        const perPage = 100;
+        let total = Infinity;
+        while (offset < total) {
+          const res = await fetch(`${API_BASE_URL || ''}/api/mangadex/cover?manga[]=${manga.id}&limit=${perPage}&offset=${offset}&order[volume]=asc`);
+          const data = await res.json();
+          total = data.total || 0;
+          const batch = (data.data || []).map((cover, i) => {
+            const raw = `https://uploads.mangadex.org/covers/${manga.id}/${cover.attributes.fileName}`;
+            return {
+              url: `${API_BASE_URL}/api/proxy?url=${encodeURIComponent(raw)}`,
+              volume: cover.attributes.volume || cover.attributes.description || `Cover ${offset + i + 1}`
+            };
+          });
+          allCovers = allCovers.concat(batch);
+          offset += perPage;
+          if (offset < total) await new Promise(r => setTimeout(r, 300));
+        }
+        state.covers = allCovers;
         finishLoadingCovers();
       } catch (e) {
         galleryLoading.classList.remove('visible');
@@ -1811,7 +1825,7 @@
         const absIdx = start + idx;
         const card = document.createElement('div');
         card.className = 'cover-card';
-        card.innerHTML = `<div class="cover-select-badge">&#x2714;</div><img src="" style="background:var(--surface2)">`;
+        card.innerHTML = `<div class="cover-select-badge">&#x2714;</div><img src="${BLANK_SVG}">`;
         card.addEventListener('click', () => {
           if (state.selectMode) toggleSelectCover(card, absIdx);
           else openLightbox(absIdx);
@@ -2058,20 +2072,13 @@
     const mangaRegistry = {};
 
     function renderCarouselItems(container, items) {
-      // Render cards with empty src first, then batch-load images
-      const html = items.map(m => createCardHtml(m)).join('');
-      container.innerHTML = html;
-      const cards = container.querySelectorAll('.genre-card');
-      const batch = [];
-      cards.forEach((card, i) => {
-        const img = card.querySelector('img');
-        if (img && items[i]) {
-          const url = buildCoverUrl(items[i]);
-          if (img.src !== url) {
-            batch.push({ el: card, url });
-          }
-        }
-      });
+      container.innerHTML = items.map(m => createCardHtml(m)).join('');
+      // Batch-load carousel images 5 at a time
+      const cards = Array.from(container.querySelectorAll('.genre-card'));
+      const batch = cards.map((card, i) => ({
+        el: card,
+        url: buildCoverUrl(items[i])
+      })).filter(b => b.url);
       if (batch.length) batchLoadImages(batch, 5, 150);
     }
 
@@ -2079,10 +2086,8 @@
       const title = getMangaTitle(m);
       const isNSFW = m.attributes?.contentRating === 'pornographic';
       const titleStyle = isNSFW ? 'style="color: var(--blush);"' : '';
-      // Store in registry instead of inline JSON
       mangaRegistry[m.id] = m;
-      // Empty src — images are batch-loaded by renderCarouselItems or loadGenre
-      return `<div class="genre-card" onclick="selectMangaById('${m.id}')"><img src="" style="background:var(--surface2)" loading="lazy"><div class="genre-card-title" ${titleStyle}>${escHtml(title)}</div></div>`;
+      return `<div class="genre-card" onclick="selectMangaById('${m.id}')"><img src="${BLANK_SVG}" loading="lazy"><div class="genre-card-title" ${titleStyle}>${escHtml(title)}</div></div>`;
     }
 
     function selectMangaById(id) {

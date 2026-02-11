@@ -1813,7 +1813,7 @@
         const titleStyle = isNSFW ? 'style="color: var(--blush);"' : '';
         return `
     <div class="autocomplete-item" data-index="${i}">
-      <img class="autocomplete-thumb" src="" style="background:var(--surface2)" alt="">
+      <img class="autocomplete-thumb" src="${BLANK_SVG}" alt="">
       <div class="autocomplete-info">
         <div class="name" ${titleStyle}>${escHtml(title)}</div>
         <div class="meta">${status} · ${year}</div>
@@ -1883,22 +1883,32 @@
 
     async function loadCovers(manga) {
       try {
-        // Fetch covers from MangaDex via proxy
-        const res = await fetch(`${API_BASE_URL || ''}/api/mangadex/cover?manga[]=${manga.id}&limit=100&order[volume]=asc`);
-        if (!res.ok) throw new Error('Failed to fetch covers');
-        const data = await res.json();
-        const covers = (data.data || []).map((cover, i) => {
-          const raw = `https://uploads.mangadex.org/covers/${manga.id}/${cover.attributes.fileName}`;
-          return {
-            url: `${API_BASE_URL}/api/proxy?url=${encodeURIComponent(raw)}`,
-            volume: cover.attributes.volume || cover.attributes.description || `Cover ${i + 1}`
-          };
-        });
+        // Paginate to fetch ALL covers (MangaDex max 100 per request)
+        let allCovers = [];
+        let offset = 0;
+        const perPage = 100;
+        let total = Infinity;
+        while (offset < total) {
+          const res = await fetch(`${API_BASE_URL || ''}/api/mangadex/cover?manga[]=${manga.id}&limit=${perPage}&offset=${offset}&order[volume]=asc`);
+          if (!res.ok) throw new Error('Failed to fetch covers');
+          const data = await res.json();
+          total = data.total || 0;
+          const batch = (data.data || []).map((cover, i) => {
+            const raw = `https://uploads.mangadex.org/covers/${manga.id}/${cover.attributes.fileName}`;
+            return {
+              url: `${API_BASE_URL}/api/proxy?url=${encodeURIComponent(raw)}`,
+              volume: cover.attributes.volume || cover.attributes.description || `Cover ${offset + i + 1}`
+            };
+          });
+          allCovers = allCovers.concat(batch);
+          offset += perPage;
+          if (offset < total) await new Promise(r => setTimeout(r, 300));
+        }
 
         // Fallback: Add current image if no covers found
-        if (!covers.length) covers.push({ url: manga.image, volume: 'Default' });
+        if (!allCovers.length) allCovers.push({ url: manga.image, volume: 'Default' });
 
-        renderPickerCovers(covers);
+        renderPickerCovers(allCovers);
       } catch (e) {
         $('pickerLoading').style.display = 'none';
         $('pickerError').style.display = 'flex';
@@ -1911,7 +1921,7 @@
       container.style.display = 'grid';
       container.innerHTML = covers.map((c, i) => `
     <div class="picker-cover" data-idx="${i}">
-      <img src="" style="background:var(--surface2)" loading="lazy">
+      <img src="${BLANK_SVG}" loading="lazy">
       <div class="cover-vol">${c.volume}</div>
     </div>`).join('');
 
