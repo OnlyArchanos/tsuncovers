@@ -1751,7 +1751,7 @@
       $('searchSpinner').classList.add('visible');
 
       try {
-        const url = `https://api.jikan.moe/v4/manga?q=${encodeURIComponent(query)}&limit=8&type=manga&order_by=popularity&sfw=false`;
+        const url = `https://api.mangadex.org/manga?title=${encodeURIComponent(query)}&limit=8&order[relevance]=desc&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic&includes[]=cover_art`;
         const res = await fetch(url);
         if (!res.ok) throw new Error('API Error');
         const data = await res.json();
@@ -1765,20 +1765,44 @@
       }
     }
 
+    // Helper function to get manga title (prioritize English)
+    function getMangaTitle(manga) {
+      const titles = manga.attributes?.title || {};
+      return titles.en || titles['ja-ro'] || titles.ja || Object.values(titles)[0] || 'Unknown Title';
+    }
+
+    // Helper function to build cover URL from MangaDex cover_art relationship
+    function buildCoverUrl(manga) {
+      if (!manga || !manga.id) return BLANK_SVG;
+      const coverRel = manga.relationships?.find(rel => rel.type === 'cover_art');
+      if (coverRel?.attributes?.fileName) {
+        return `https://uploads.mangadex.org/covers/${manga.id}/${coverRel.attributes.fileName}.512.jpg`;
+      }
+      return BLANK_SVG;
+    }
+
     function renderAutocomplete(results) {
       if (!results.length) {
         autocomplete.innerHTML = `<div class="ac-error">no results.</div>`;
         autocomplete.classList.add('open');
         return;
       }
-      autocomplete.innerHTML = results.map((m, i) => `
+      autocomplete.innerHTML = results.map((m, i) => {
+        const title = getMangaTitle(m);
+        const coverUrl = buildCoverUrl(m);
+        const year = m.attributes?.year || '?';
+        const status = m.attributes?.status || 'unknown';
+        const isNSFW = m.attributes?.contentRating === 'pornographic';
+        const titleStyle = isNSFW ? 'style="color: var(--blush);"' : '';
+        return `
     <div class="autocomplete-item" data-index="${i}">
-      <img class="autocomplete-thumb" src="${m.images?.jpg?.small_image_url || BLANK_SVG}" alt="">
+      <img class="autocomplete-thumb" src="${coverUrl}" alt="">
       <div class="autocomplete-info">
-        <div class="name">${escHtml(m.title)}</div>
-        <div class="meta">${m.type} · ${m.volumes || '?'} vol · ${m.score || 'N/A'}★</div>
+        <div class="name" ${titleStyle}>${escHtml(title)}</div>
+        <div class="meta">${status} · ${year}</div>
       </div>
-    </div>`).join('');
+    </div>`;
+      }).join('');
       autocomplete.classList.add('open');
 
       autocomplete.querySelectorAll('.autocomplete-item').forEach(item => {
@@ -1800,9 +1824,9 @@
       if (firstEmpty === -1) { showNotif("Grid full. Clear a slot first.", 'blush'); return; }
 
       currentGrid[firstEmpty] = {
-        id: manga.mal_id,
-        title: manga.title,
-        image: manga.images?.jpg?.image_url || BLANK_SVG
+        id: manga.id,
+        title: getMangaTitle(manga),
+        image: buildCoverUrl(manga)
       };
       saveCurrentGrid();
       renderGrid();
@@ -1818,9 +1842,14 @@
     let pickerManga = null;
 
     function openCoverPicker(slotIdx, manga) {
+      if (!manga) {
+        showNotif("Can't open cover picker for invalid manga.", 'error');
+        return;
+      }
       pickerSlotIdx = slotIdx;
       pickerManga = manga;
-      $('pickerTitle').textContent = manga.title || 'Choose Cover';
+      const title = manga.title || getMangaTitle(manga) || 'Choose Cover';
+      $('pickerTitle').textContent = title;
       $('coverPickerOverlay').classList.add('open');
       $('pickerLoading').style.display = 'flex';
       $('pickerCovers').style.display = 'none';
@@ -1830,13 +1859,13 @@
 
     async function loadCovers(manga) {
       try {
-        // Try Jikan first for simplicity in this version
-        const res = await fetch(`https://api.jikan.moe/v4/manga/${manga.id || manga.mal_id}/pictures`);
+        // Fetch covers from MangaDex
+        const res = await fetch(`https://api.mangadex.org/cover?manga[]=${manga.id}&limit=100&order[volume]=asc`);
         if (!res.ok) throw new Error('Failed to fetch covers');
         const data = await res.json();
-        const covers = (data.data || []).map((p, i) => ({
-          url: p.jpg?.large_image_url || p.jpg?.image_url,
-          volume: `Cover ${i + 1}`
+        const covers = (data.data || []).map((cover, i) => ({
+          url: `https://uploads.mangadex.org/covers/${manga.id}/${cover.attributes.fileName}`,
+          volume: cover.attributes.volume || cover.attributes.description || `Cover ${i + 1}`
         }));
 
         // Fallback: Add current image if no covers found

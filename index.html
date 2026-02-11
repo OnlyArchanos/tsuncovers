@@ -1648,7 +1648,7 @@
     });
     async function fetchSuggestions(query, autoSelect = false) {
       try {
-        const url = `https://api.jikan.moe/v4/manga?q=${encodeURIComponent(query)}&limit=8&order_by=popularity&sfw=false`;
+        const url = `https://api.mangadex.org/manga?title=${encodeURIComponent(query)}&limit=8&order[relevance]=desc&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic&includes[]=cover_art`;
         const res = await fetch(url);
         if (!res.ok) throw new Error('API Error');
         const data = await res.json();
@@ -1657,13 +1657,35 @@
         console.error(e);
       }
     }
+    // Helper function to get manga title (prioritize English)
+    function getMangaTitle(manga) {
+      const titles = manga.attributes?.title || {};
+      return titles.en || titles['ja-ro'] || titles.ja || Object.values(titles)[0] || 'Unknown Title';
+    }
+
+    // Helper function to build cover URL from MangaDex cover_art relationship
+    function buildCoverUrl(manga) {
+      if (!manga || !manga.id) return '';
+      const coverRel = manga.relationships?.find(rel => rel.type === 'cover_art');
+      if (coverRel?.attributes?.fileName) {
+        return `https://uploads.mangadex.org/covers/${manga.id}/${coverRel.attributes.fileName}.512.jpg`;
+      }
+      return '';
+    }
+
     function renderDropdown(results) {
       if (!results.length) { closeDropdown(); return; }
-      acDropdown.innerHTML = results.map((m, i) => `
+      acDropdown.innerHTML = results.map((m, i) => {
+        const title = getMangaTitle(m);
+        const coverUrl = buildCoverUrl(m);
+        const isNSFW = m.attributes?.contentRating === 'pornographic';
+        const titleStyle = isNSFW ? 'style="color: var(--blush);"' : '';
+        return `
     <div class="autocomplete-item" data-idx="${i}">
-      <img class="autocomplete-thumb" src="${m.images?.jpg?.small_image_url || ''}" alt="">
-      <div class="autocomplete-info"><span class="name">${escHtml(m.title)}</span></div>
-    </div>`).join('');
+      <img class="autocomplete-thumb" src="${coverUrl}" alt="">
+      <div class="autocomplete-info"><span class="name" ${titleStyle}>${escHtml(title)}</span></div>
+    </div>`;
+      }).join('');
       acDropdown.classList.add('open');
       acDropdown.querySelectorAll('.autocomplete-item').forEach((el, i) => {
         el.addEventListener('click', () => selectManga(results[i]));
@@ -1675,7 +1697,8 @@
     // ===================== SELECT MANGA =====================
     async function selectManga(manga) {
       closeDropdown();
-      searchInput.value = manga.title;
+      const title = getMangaTitle(manga);
+      searchInput.value = title;
       state.currentManga = manga;
       state.covers = [];
       state.displayedCovers = [];
@@ -1691,10 +1714,16 @@
     }
 
     function renderMeta(m) {
-      $('metaCoverImg').src = m.images?.jpg?.large_image_url || '';
-      $('metaTitle').textContent = m.title;
-      $('metaTags').innerHTML = (m.genres || []).slice(0, 3).map(g => `<span class="tag">${escHtml(g.name)}</span>`).join('');
-      $('metaSynopsis').textContent = m.synopsis || 'No synopsis.';
+      const coverUrl = buildCoverUrl(m);
+      const title = getMangaTitle(m);
+      const isNSFW = m.attributes?.contentRating === 'pornographic';
+      $('metaCoverImg').src = coverUrl;
+      $('metaTitle').textContent = title;
+      $('metaTitle').style.color = isNSFW ? 'var(--blush)' : '';
+      // MangaDex tags are different structure - extract first 3 tags
+      const tags = m.attributes?.tags || [];
+      $('metaTags').innerHTML = tags.slice(0, 3).map(tag => `<span class="tag">${escHtml(tag.attributes?.name?.en || tag.attributes?.name || '')}</span>`).join('');
+      $('metaSynopsis').textContent = m.attributes?.description?.en || m.attributes?.description?.['ja-ro'] || 'No synopsis.';
       $('metaTsunComment').textContent = "I've read this. Not saying I recommend it.";
       mangaMeta.classList.add('visible');
     }
@@ -1703,11 +1732,12 @@
       gallerySection.classList.remove('visible');
       galleryLoading.classList.add('visible');
       try {
-        // Try Jikan first (Simpler for demo, MangaDex requires more logic)
-        const res = await fetch(`https://api.jikan.moe/v4/manga/${manga.mal_id}/pictures`);
+        // Fetch covers from MangaDex
+        const res = await fetch(`https://api.mangadex.org/cover?manga[]=${manga.id}&limit=100&order[volume]=asc`);
         const data = await res.json();
-        state.covers = (data.data || []).map((p, i) => ({
-          url: p.jpg?.large_image_url, volume: `Cover ${i + 1}`
+        state.covers = (data.data || []).map((cover, i) => ({
+          url: `https://uploads.mangadex.org/covers/${manga.id}/${cover.attributes.fileName}`,
+          volume: cover.attributes.volume || cover.attributes.description || `Cover ${i + 1}`
         }));
         finishLoadingCovers();
       } catch (e) {
@@ -1825,8 +1855,8 @@
       indices.forEach((coverIdx, i) => {
         if (i < 9) {
           gridData[i] = {
-            id: state.currentManga.mal_id,
-            title: state.currentManga.title,
+            id: state.currentManga.id,
+            title: getMangaTitle(state.currentManga),
             image: state.covers[coverIdx].url
           };
         }
@@ -1911,7 +1941,8 @@
 
     async function loadGenre(g) {
       const carousel = $(`cat-${g}`);
-      const cacheKey = `tsun_cache_${g}`;
+      // Using v2 cache key to invalidate old Jikan data after migration
+      const cacheKey = `tsun_cache_v2_${g}`;
 
       // CACHE CHECK
       const cached = localStorage.getItem(cacheKey);
@@ -1927,10 +1958,18 @@
       }
 
       // FETCH: Batch 1 (Top 3 - Fast)
-      const genreId = g === 'Action' ? 1 : g === 'Romance' ? 22 : g === 'Fantasy' ? 10 : g === 'Horror' ? 14 : 4;
+      // MangaDex tag UUIDs for genres
+      const MANGADEX_TAGS = {
+        'Action': '391b0423-d847-456f-aff0-8b0cfc03066b',
+        'Romance': '423e2eae-a7a2-4a8b-ac03-a8351462d71d',
+        'Fantasy': 'cdc58593-87dd-415e-bbc0-2ec27bf404cc',
+        'Horror': 'cdad7e68-1419-41dd-bdce-27753074a640',
+        'Comedy': '4d32cc48-9f00-4cca-9b5a-a839f0764984'
+      };
+      const tagId = MANGADEX_TAGS[g];
 
       try {
-        const res1 = await fetch(`https://api.jikan.moe/v4/manga?q=&order_by=popularity&limit=3&genres=${genreId}`);
+        const res1 = await fetch(`https://api.mangadex.org/manga?includedTags[]=${tagId}&limit=3&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic&includes[]=cover_art`);
         if (res1.status === 429) throw new Error('Rate limit');
         const data1 = await res1.json();
         const items1 = data1.data || [];
@@ -1941,14 +1980,11 @@
         html += Array(7).fill('<div class="skeleton-card"></div>').join('');
         carousel.innerHTML = html;
 
-        // RATE LIMIT PAUSE
-        await new Promise(r => setTimeout(r, 1000));
+        // RATE LIMIT PAUSE - MangaDex has better rate limits (5/sec vs Jikan's 3/sec)
+        await new Promise(r => setTimeout(r, 600));
 
         // FETCH: Batch 2 (Next 22 - Slower)
-        // Note: Jikan limit is max 25 per page. We'll fetch 25.
-        // There will be overlap (first 3), we'll deduplicate or just replace all.
-        // Efficient way: Fetch 25, replace all. Visual jump is minor if images cached.
-        const res2 = await fetch(`https://api.jikan.moe/v4/manga?q=&order_by=popularity&limit=25&genres=${genreId}`);
+        const res2 = await fetch(`https://api.mangadex.org/manga?includedTags[]=${tagId}&limit=25&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic&includes[]=cover_art`);
         if (res2.status === 429) throw new Error('Rate limit');
         const data2 = await res2.json();
         const itemsFull = data2.data || [];
@@ -1959,7 +1995,7 @@
         localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: itemsFull }));
 
         // RATE LIMIT PAUSE (Before next genre)
-        await new Promise(r => setTimeout(r, 1100));
+        await new Promise(r => setTimeout(r, 600));
 
       } catch (e) {
         console.error(e);
@@ -1973,7 +2009,14 @@
     }
 
     function createCardHtml(m) {
-      return `<div class="genre-card" onclick="selectManga({title: '${escHtml(m.title)}', mal_id: ${m.mal_id}, images: {jpg: {large_image_url: '${m.images.jpg.large_image_url}'}}, synopsis: '${escHtml(m.synopsis || '')}', genres: ${JSON.stringify(m.genres || []).replace(/'/g, "&#39;")}})"><img src="${m.images.jpg.image_url}" loading="lazy"><div class="genre-card-title">${escHtml(m.title)}</div><div class="genre-card-score"><span class="star">★</span> ${m.score || 'N/A'}</div></div>`;
+      // Helper to build manga object for selectManga from MangaDex data
+      const title = getMangaTitle(m);
+      const coverUrl = buildCoverUrl(m);
+      const isNSFW = m.attributes?.contentRating === 'pornographic';
+      const titleStyle = isNSFW ? 'style="color: var(--blush);"' : '';
+      // Escape data for onclick attribute
+      const mangaJson = JSON.stringify(m).replace(/"/g, '&quot;');
+      return `<div class="genre-card" onclick='selectManga(${mangaJson})'><img src="${coverUrl}" loading="lazy"><div class="genre-card-title" ${titleStyle}>${escHtml(title)}</div></div>`;
     }
 
     function showNotif(msg, type = '') {
