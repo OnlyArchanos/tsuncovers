@@ -2008,20 +2008,29 @@
       }
     }
 
+    // Global registry to store manga objects (avoids inline JSON in HTML attributes)
+    const mangaRegistry = {};
+
     function renderCarouselItems(container, items) {
       container.innerHTML = items.map(m => createCardHtml(m)).join('');
     }
 
     function createCardHtml(m) {
-      // Helper to build manga object for selectManga from MangaDex data
       const title = getMangaTitle(m);
       const coverUrl = buildCoverUrl(m);
       const isNSFW = m.attributes?.contentRating === 'pornographic';
       const titleStyle = isNSFW ? 'style="color: var(--blush);"' : '';
-      // Escape data for onclick attribute
-      const mangaJson = JSON.stringify(m).replace(/"/g, '&quot;');
-      return `<div class="genre-card" onclick='selectManga(${mangaJson})'><img src="${coverUrl}" loading="lazy"><div class="genre-card-title" ${titleStyle}>${escHtml(title)}</div></div>`;
+      // Store in registry instead of inline JSON
+      mangaRegistry[m.id] = m;
+      return `<div class="genre-card" onclick="selectMangaById('${m.id}')"><img src="${coverUrl}" loading="lazy"><div class="genre-card-title" ${titleStyle}>${escHtml(title)}</div></div>`;
     }
+
+    function selectMangaById(id) {
+      const manga = mangaRegistry[id];
+      if (manga) selectManga(manga);
+    }
+    // Expose to window for onclick
+    window.selectMangaById = selectMangaById;
 
     function showNotif(msg, type = '') {
       const el = document.createElement('div');
