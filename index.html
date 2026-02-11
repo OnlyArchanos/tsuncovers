@@ -219,6 +219,7 @@
       max-height: 320px;
       overflow-y: auto;
       display: none;
+      box-shadow: var(--card-shadow);
     }
 
     .autocomplete-dropdown.open {
@@ -914,6 +915,30 @@
       background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
       background-size: 200% 100%;
       animation: shimmer 1.4s infinite;
+    }
+
+    .skeleton-card {
+      width: 140px;
+      aspect-ratio: 2/3;
+      background: var(--surface2);
+      flex-shrink: 0;
+      scroll-snap-align: start;
+      border-radius: var(--radius);
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 0.6;
+      }
+
+      50% {
+        opacity: 0.8;
+      }
+
+      100% {
+        opacity: 0.6;
+      }
     }
 
     /* EMPTY STATE */
@@ -1773,15 +1798,87 @@
 
     // ===================== GENRES & INIT =====================
     async function loadGenres() {
+      // 1. Render Skeletons for all genres immediately
       for (const g of state.genres) {
         const block = document.createElement('div');
         block.innerHTML = `<h2 class="genre-title">${g}</h2><div class="genre-carousel" id="cat-${g}"></div>`;
         genreBlocks.appendChild(block);
-        // Fetch top 5 for demo
-        const res = await fetch(`https://api.jikan.moe/v4/manga?q=&order_by=popularity&limit=5&genres=${g === 'Action' ? 1 : g === 'Romance' ? 22 : g === 'Fantasy' ? 10 : g === 'Horror' ? 14 : 4}`);
-        const data = await res.json();
-        $(`cat-${g}`).innerHTML = (data.data || []).map(m => `<div class="genre-card"><img src="${m.images.jpg.image_url}"></div>`).join('');
+        const carousel = $(`cat-${g}`);
+        // Add 10 skeleton cards (enough to fill screen)
+        carousel.innerHTML = Array(10).fill('<div class="skeleton-card"></div>').join('');
       }
+
+      // 2. Progressive Fetching (Genre by Genre)
+      for (const g of state.genres) {
+        await loadGenre(g);
+      }
+    }
+
+    async function loadGenre(g) {
+      const carousel = $(`cat-${g}`);
+      const cacheKey = `tsun_cache_${g}`;
+
+      // CACHE CHECK
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          // 24h expiry check (optional, but good practice). Here just checking existence.
+          if (Date.now() - parsed.ts < 24 * 60 * 60 * 1000) {
+            renderCarouselItems(carousel, parsed.data);
+            return;
+          }
+        } catch (e) { }
+      }
+
+      // FETCH: Batch 1 (Top 3 - Fast)
+      const genreId = g === 'Action' ? 1 : g === 'Romance' ? 22 : g === 'Fantasy' ? 10 : g === 'Horror' ? 14 : 4;
+
+      try {
+        const res1 = await fetch(`https://api.jikan.moe/v4/manga?q=&order_by=popularity&limit=3&genres=${genreId}`);
+        if (res1.status === 429) throw new Error('Rate limit');
+        const data1 = await res1.json();
+        const items1 = data1.data || [];
+
+        // Render first 3 immediately (Keep rest skeletons)
+        let html = items1.map(m => createCardHtml(m)).join('');
+        // Append remaining skeletons (e.g. 7 more)
+        html += Array(7).fill('<div class="skeleton-card"></div>').join('');
+        carousel.innerHTML = html;
+
+        // RATE LIMIT PAUSE
+        await new Promise(r => setTimeout(r, 1000));
+
+        // FETCH: Batch 2 (Next 22 - Slower)
+        // Note: Jikan limit is max 25 per page. We'll fetch 25.
+        // There will be overlap (first 3), we'll deduplicate or just replace all.
+        // Efficient way: Fetch 25, replace all. Visual jump is minor if images cached.
+        const res2 = await fetch(`https://api.jikan.moe/v4/manga?q=&order_by=popularity&limit=25&genres=${genreId}`);
+        if (res2.status === 429) throw new Error('Rate limit');
+        const data2 = await res2.json();
+        const itemsFull = data2.data || [];
+
+        renderCarouselItems(carousel, itemsFull);
+
+        // CACHE SAVE
+        localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: itemsFull }));
+
+        // RATE LIMIT PAUSE (Before next genre)
+        await new Promise(r => setTimeout(r, 1100));
+
+      } catch (e) {
+        console.error(e);
+        // On error, if we have partial data, keep it. If skeletons, show error?
+        // Just leave skeletons or partials for now to avoid ugly error text.
+      }
+    }
+
+    function renderCarouselItems(container, items) {
+      container.innerHTML = items.map(m => createCardHtml(m)).join('');
+    }
+
+    function createCardHtml(m) {
+      return `<div class="genre-card" onclick="selectManga({title: '${escHtml(m.title)}', mal_id: ${m.mal_id}, images: {jpg: {large_image_url: '${m.images.jpg.large_image_url}'}}, synopsis: '${escHtml(m.synopsis || '')}', genres: ${JSON.stringify(m.genres || []).replace(/'/g, "&#39;")}})"><img src="${m.images.jpg.image_url}" loading="lazy"><div class="genre-card-title">${escHtml(m.title)}</div><div class="genre-card-score"><span class="star">★</span> ${m.score || 'N/A'}</div></div>`;
     }
 
     function showNotif(msg, type = '') {

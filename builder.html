@@ -303,6 +303,9 @@
       margin-bottom: 2rem;
       transition: border-color var(--transition);
       animation: fadeUp 0.4s ease 0.1s both;
+      position: relative;
+      z-index: 50;
+      /* Ensure search dropdown appears above grid */
     }
 
     .search-section:focus-within {
@@ -1922,6 +1925,7 @@
       </div>
       <div class="grid-item-actions">
         <button class="btn btn-sm" onclick="event.stopPropagation(); loadGridToEditor('${g.id}')">Edit</button>
+        <button class="btn btn-sm danger" onclick="event.stopPropagation(); deleteSavedGrid('${g.id}')" style="margin-left:5px; border-color:var(--error); color:var(--error)">Delete</button>
       </div>
     </div>`).join('');
 
@@ -2069,8 +2073,18 @@
       showNotif("Loaded. Don't mess it up this time.", 'blush');
     }
 
+    function deleteSavedGrid(id) {
+      if (!confirm("Delete this grid? It's gone forever, just so you know.")) return;
+
+      savedGrids = savedGrids.filter(g => String(g.id) !== String(id));
+      localStorage.setItem('tsun_saved_grids', JSON.stringify(savedGrids));
+      renderSavedGrids();
+      showNotif("Deleted. I didn't like that one anyway.", 'blush');
+    }
+
     // Expose literal string function to window for onclick
     window.loadGridToEditor = loadGridToEditor;
+    window.deleteSavedGrid = deleteSavedGrid;
 
     initGoogleAuth();
   </script>
