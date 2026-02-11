@@ -1,963 +1,1762 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tsun — It's not like I archived these for you</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0a0a0a;
-    --surface: #111111;
-    --surface2: #1a1a1a;
-    --border: #2a2a2a;
-    --text: #e8e4dc;
-    --muted: #6b6560;
-    --accent: #c9a96e;
-    --accent2: #8b5e3c;
-    --danger: #9b4040;
-    --blush: #c97070;
-    --card-shadow: 0 4px 24px rgba(0,0,0,0.6);
-    --radius: 3px;
-    --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
-  }
-  [data-theme="light"] {
-    --bg: #f5f0e8;
-    --surface: #ede8df;
-    --surface2: #e5dfd4;
-    --border: #cfc8bc;
-    --text: #1a1714;
-    --muted: #8a8278;
-    --accent: #8b5e2c;
-    --accent2: #c9a96e;
-    --danger: #9b4040;
-    --blush: #c97070;
-    --card-shadow: 0 4px 24px rgba(0,0,0,0.15);
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tsun — It's not like I archived these for you</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Mono:wght@300;400&display=swap"
+    rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --surface2: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #e8e4dc;
+      --muted: #6b6560;
+      --accent: #c9a96e;
+      --accent2: #8b5e3c;
+      --danger: #9b4040;
+      --blush: #c97070;
+      --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+      --radius: 3px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
+    [data-theme="light"] {
+      --bg: #f5f0e8;
+      --surface: #ede8df;
+      --surface2: #e5dfd4;
+      --border: #cfc8bc;
+      --text: #1a1714;
+      --muted: #8a8278;
+      --accent: #8b5e2c;
+      --accent2: #c9a96e;
+      --danger: #9b4040;
+      --blush: #c97070;
+      --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+    }
 
-  body {
-    font-family: 'DM Mono', monospace;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 13px;
-    line-height: 1.6;
-    transition: background var(--transition), color var(--transition);
-  }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  /* HEADER */
-  header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    backdrop-filter: blur(12px);
-    background: color-mix(in srgb, var(--bg) 90%, transparent);
-  }
+    html {
+      scroll-behavior: smooth;
+    }
 
-  .logo {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.8rem;
-    font-weight: 300;
-    letter-spacing: 0.15em;
-    color: var(--accent);
-    text-decoration: none;
-    display: flex;
-    align-items: baseline;
-    gap: 2px;
-  }
-  .logo span { color: var(--text); font-style: italic; }
-  .logo-blush {
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    color: var(--blush);
-    font-family: 'DM Mono', monospace;
-    font-style: normal;
-    opacity: 0.7;
-    margin-left: 6px;
-    align-self: center;
-  }
+    body {
+      font-family: 'DM Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 13px;
+      line-height: 1.6;
+      transition: background var(--transition), color var(--transition);
+    }
 
-  .header-right { display: flex; align-items: center; gap: 1rem; }
+    /* HEADER */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(12px);
+      background: color-mix(in srgb, var(--bg) 90%, transparent);
+    }
 
-  .header-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    cursor: pointer;
-    padding: 6px 12px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    transition: all var(--transition);
-    text-transform: uppercase;
-    text-decoration: none;
-    display: inline-block;
-  }
-  .header-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .header-btn.primary { 
-    background: var(--accent); 
-    color: var(--bg); 
-    border-color: var(--accent);
-  }
-  .header-btn.primary:hover { 
-    background: var(--accent2); 
-    border-color: var(--accent2);
-  }
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem;
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      text-decoration: none;
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+    }
 
-  .user-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 12px;
-    border: 1px solid var(--border);
-    font-size: 11px;
-    color: var(--text);
-  }
-  .user-badge img {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-  }
+    .logo span {
+      color: var(--text);
+      font-style: italic;
+    }
 
-  /* HERO */
-  .hero {
-    padding: 5rem 2rem 3rem;
-    max-width: 900px;
-    margin: 0 auto;
-    text-align: center;
-  }
+    .logo-blush {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--blush);
+      font-family: 'DM Mono', monospace;
+      font-style: normal;
+      opacity: 0.7;
+      margin-left: 6px;
+      align-self: center;
+    }
 
-  .hero-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(2.5rem, 6vw, 5rem);
-    font-weight: 300;
-    line-height: 1;
-    letter-spacing: -0.02em;
-    margin-bottom: 0.5rem;
-  }
-  .hero-title em { font-style: italic; color: var(--accent); }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
 
-  .hero-sub {
-    color: var(--muted);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    font-size: 11px;
-    margin-bottom: 2.5rem;
-  }
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      padding: 6px 12px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      transition: all var(--transition);
+      text-transform: uppercase;
+    }
 
-  .hero-disclaimer {
-    color: var(--blush);
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    margin-top: -1.8rem;
-    margin-bottom: 2rem;
-    opacity: 0.8;
-    font-style: italic;
-  }
+    .theme-toggle:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
 
-  .search-wrap {
-    position: relative;
-    max-width: 560px;
-    margin: 0 auto;
-  }
+    /* HERO */
+    .hero {
+      padding: 5rem 2rem 3rem;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+    }
 
-  .search-input {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 14px;
-    padding: 14px 50px 14px 20px;
-    outline: none;
-    transition: border-color var(--transition);
-    letter-spacing: 0.05em;
-  }
-  .search-input::placeholder { color: var(--muted); }
-  .search-input:focus { border-color: var(--accent); }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 300;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
 
-  .search-icon {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--muted);
-    pointer-events: none;
-    font-size: 16px;
-  }
+    .hero-title em {
+      font-style: italic;
+      color: var(--accent);
+    }
 
-  .autocomplete-dropdown {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0; right: 0;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    z-index: 200;
-    max-height: 320px;
-    overflow-y: auto;
-    display: none;
-  }
-  .autocomplete-dropdown.open { display: block; }
+    .hero-sub {
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-size: 11px;
+      margin-bottom: 2.5rem;
+    }
 
-  .autocomplete-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
-    cursor: pointer;
-    transition: background var(--transition);
-    border-bottom: 1px solid var(--border);
-  }
-  .autocomplete-item:last-child { border-bottom: none; }
-  .autocomplete-item:hover, .autocomplete-item.active { background: var(--surface2); }
+    .hero-disclaimer {
+      color: var(--blush);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      margin-top: -1.8rem;
+      margin-bottom: 2rem;
+      opacity: 0.8;
+      font-style: italic;
+    }
 
-  .autocomplete-thumb {
-    width: 32px;
-    height: 44px;
-    object-fit: cover;
-    flex-shrink: 0;
-    background: var(--surface2);
-  }
+    .search-wrap {
+      position: relative;
+      max-width: 560px;
+      margin: 0 auto;
+    }
 
-  .autocomplete-info .name { color: var(--text); font-size: 13px; display: block; }
-  .autocomplete-info .meta { color: var(--muted); font-size: 11px; letter-spacing: 0.05em; }
+    .search-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      padding: 14px 50px 14px 20px;
+      outline: none;
+      transition: border-color var(--transition);
+      letter-spacing: 0.05em;
+    }
 
-  /* COLOR FILTER */
-  .color-filter {
-    max-width: 560px;
-    margin: 1.5rem auto 0;
-    padding: 1rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-  }
+    .search-input::placeholder {
+      color: var(--muted);
+    }
 
-  .color-filter-label {
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.8rem;
-    display: block;
-  }
+    .search-input:focus {
+      border-color: var(--accent);
+    }
 
-  .color-swatches {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+    .search-icon {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+      font-size: 16px;
+    }
 
-  .color-swatch {
-    width: 40px;
-    height: 40px;
-    border: 2px solid var(--border);
-    cursor: pointer;
-    transition: all var(--transition);
-    position: relative;
-  }
-  .color-swatch:hover {
-    transform: scale(1.1);
-    border-color: var(--accent);
-  }
-  .color-swatch.active {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
-  }
-  .color-swatch.active::after {
-    content: '✓';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    font-size: 18px;
-    text-shadow: 0 0 3px rgba(0,0,0,0.8);
-  }
+    .autocomplete-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      z-index: 200;
+      max-height: 320px;
+      overflow-y: auto;
+      display: none;
+    }
 
-  /* GENRE BLOCKS */
-  .genre-blocks {
-    max-width: 1400px;
-    margin: 4rem auto;
-    padding: 0 2rem;
-  }
+    .autocomplete-dropdown.open {
+      display: block;
+    }
 
-  .genre-block {
-    margin-bottom: 3rem;
-  }
+    .autocomplete-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background var(--transition);
+      border-bottom: 1px solid var(--border);
+    }
 
-  .genre-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 1rem;
-  }
+    .autocomplete-item:last-child {
+      border-bottom: none;
+    }
 
-  .genre-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.8rem;
-    font-weight: 300;
-    letter-spacing: 0.08em;
-  }
-  .genre-title-sub {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    color: var(--blush);
-    margin-left: 12px;
-    font-style: italic;
-    opacity: 0.7;
-  }
+    .autocomplete-item:hover,
+    .autocomplete-item.active {
+      background: var(--surface2);
+    }
 
-  .genre-nav {
-    display: flex;
-    gap: 6px;
-  }
+    .autocomplete-thumb {
+      width: 32px;
+      height: 44px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--surface2);
+    }
 
-  .genre-nav-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    cursor: pointer;
-    width: 32px;
-    height: 32px;
-    font-size: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--transition);
-    line-height: 1;
-  }
-  .genre-nav-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
+    .autocomplete-info .name {
+      color: var(--text);
+      font-size: 13px;
+      display: block;
+    }
 
-  .genre-carousel-outer {
-    overflow: hidden;
-    position: relative;
-  }
+    .autocomplete-info .meta {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.05em;
+    }
 
-  .genre-carousel {
-    display: flex;
-    gap: 14px;
-    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
-  }
+    /* MANGA META CARD */
+    .manga-meta {
+      max-width: 1200px;
+      margin: 0 auto 2rem;
+      padding: 0 2rem;
+      display: none;
+      animation: fadeUp 0.3s ease;
+    }
 
-  .genre-card {
-    flex: 0 0 140px;
-    cursor: pointer;
-    transition: transform var(--transition);
-  }
-  .genre-card:hover {
-    transform: translateY(-4px);
-  }
+    .manga-meta.visible {
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+    }
 
-  .genre-card img {
-    width: 140px;
-    aspect-ratio: 2/3;
-    object-fit: cover;
-    display: block;
-    box-shadow: var(--card-shadow);
-    margin-bottom: 8px;
-  }
+    .meta-cover {
+      width: 120px;
+      flex-shrink: 0;
+    }
 
-  .genre-card-title {
-    font-size: 11px;
-    line-height: 1.3;
-    margin-bottom: 4px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
+    .meta-cover img {
+      width: 100%;
+      box-shadow: var(--card-shadow);
+    }
 
-  .genre-card-score {
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 0.05em;
-  }
-  .genre-card-score .star {
-    color: var(--accent);
-  }
+    .meta-info {
+      flex: 1;
+    }
 
-  /* SKELETON */
-  .skeleton {
-    background: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%);
-    background-size: 200% 100%;
-    animation: skeleton 1.5s ease-in-out infinite;
-  }
-  @keyframes skeleton {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
+    .meta-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem;
+      font-weight: 300;
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
 
-  /* NOTIF */
-  .notif {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 12px 20px;
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    box-shadow: var(--card-shadow);
-    z-index: 1000;
-    animation: slideIn 0.3s ease;
-    max-width: 320px;
-  }
-  .notif.blush { border-color: var(--blush); color: var(--blush); }
-  @keyframes slideIn {
-    from { transform: translateY(100px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
+    .meta-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 1rem;
+    }
 
-  /* LOGIN MODAL */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.8);
-    backdrop-filter: blur(4px);
-    z-index: 500;
-    display: none;
-    align-items: center;
-    justify-content: center;
-  }
-  .modal-overlay.open { display: flex; }
+    .tag {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
 
-  .modal-content {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 2rem;
-    max-width: 400px;
-    width: 90%;
-    box-shadow: var(--card-shadow);
-    position: relative;
-  }
+    .tag.accent {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
 
-  .modal-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-size: 24px;
-    cursor: pointer;
-    line-height: 1;
-    transition: color var(--transition);
-  }
-  .modal-close:hover { color: var(--text); }
+    .meta-synopsis {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.8;
+      max-width: 600px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
 
-  .modal-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.8rem;
-    font-weight: 300;
-    margin-bottom: 1rem;
-  }
+    .meta-tsun-comment {
+      margin-top: 0.6rem;
+      color: var(--blush);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      font-style: italic;
+      opacity: 0.9;
+    }
 
-  .modal-text {
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
-  }
+    .meta-actions {
+      margin-top: 1.2rem;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
 
-  .google-btn {
-    width: 100%;
-    padding: 12px;
-    background: white;
-    color: #1a1a1a;
-    border: 1px solid var(--border);
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: all var(--transition);
-  }
-  .google-btn:hover {
-    background: #f5f5f5;
-    transform: translateY(-2px);
-    box-shadow: var(--card-shadow);
-  }
-  .google-btn img {
-    width: 20px;
-    height: 20px;
-  }
+    .btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 8px 18px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text);
+      transition: all var(--transition);
+    }
 
-  @media (max-width: 768px) {
-    header { padding: 0 1rem; }
-    .hero { padding: 3rem 1rem 2rem; }
-    .genre-blocks { padding: 0 1rem; }
-    .genre-carousel { gap: 10px; }
-    .genre-card { flex: 0 0 110px; }
-    .genre-card img { width: 110px; }
-    .notif { right: 1rem; bottom: 1rem; }
-  }
-</style>
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0a0a0a;
+    }
+
+    .btn.primary:hover {
+      background: transparent;
+      color: var(--accent);
+    }
+
+    .btn.danger {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .btn.danger:hover {
+      background: var(--danger);
+      color: white;
+    }
+
+    .selection-count {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+    }
+
+    /* GALLERY */
+    .gallery-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+      display: none;
+    }
+
+    .gallery-section.visible {
+      display: block;
+    }
+
+    .gallery-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .gallery-label {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .gallery-label span {
+      color: var(--accent);
+    }
+
+    .covers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .cover-card {
+      position: relative;
+      cursor: pointer;
+      animation: fadeUp 0.3s ease both;
+    }
+
+    .cover-card img {
+      width: 100%;
+      aspect-ratio: 2/3;
+      object-fit: cover;
+      display: block;
+      transition: transform var(--transition), box-shadow var(--transition);
+      background: var(--surface);
+    }
+
+    .cover-card:hover img {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    .cover-card.selected img {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .cover-select-badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 22px;
+      height: 22px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      opacity: 0;
+      transition: opacity var(--transition);
+      color: var(--muted);
+    }
+
+    .cover-card:hover .cover-select-badge,
+    .cover-card.selected .cover-select-badge {
+      opacity: 1;
+    }
+
+    .cover-card.selected .cover-select-badge {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0a0a0a;
+    }
+
+    .cover-vol {
+      margin-top: 6px;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .load-more-wrap {
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    /* SELECTION TOOLBAR */
+    .selection-toolbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--accent);
+      padding: 14px 2rem;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 300;
+      animation: slideUp 0.25s ease;
+    }
+
+    .selection-toolbar.visible {
+      display: flex;
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .toolbar-count {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      font-weight: 300;
+      color: var(--accent);
+    }
+
+    .toolbar-label {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .grid-preview {
+      display: grid;
+      grid-template-columns: repeat(3, 24px);
+      grid-template-rows: repeat(3, 24px);
+      gap: 2px;
+      opacity: 0.6;
+    }
+
+    .grid-preview-cell {
+      background: var(--border);
+      transition: background var(--transition);
+    }
+
+    .grid-preview-cell.filled {
+      background: var(--accent);
+    }
+
+    /* LIGHTBOX */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      z-index: 500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .lightbox.open {
+      display: flex;
+    }
+
+    .lightbox-inner {
+      position: relative;
+      max-width: 400px;
+      width: 100%;
+      user-select: none;
+    }
+
+    .lightbox-img {
+      width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+      display: block;
+      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.8);
+      touch-action: pan-y;
+    }
+
+    .lightbox-info {
+      position: absolute;
+      bottom: -2.5rem;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .lightbox-nav {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.6);
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all var(--transition);
+      z-index: 501;
+    }
+
+    .lightbox-nav:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .lightbox-nav.prev {
+      left: 1.5rem;
+    }
+
+    .lightbox-nav.next {
+      right: 1.5rem;
+    }
+
+    .lightbox-close {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: none;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.6);
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all var(--transition);
+      z-index: 501;
+    }
+
+    .lightbox-close:hover {
+      border-color: var(--blush);
+      color: var(--blush);
+    }
+
+    /* GRID MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 600;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      max-width: 500px;
+      width: 100%;
+      padding: 2rem;
+      animation: fadeUp 0.25s ease;
+    }
+
+    .modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      font-weight: 300;
+      margin-bottom: 0.3rem;
+    }
+
+    .modal-sub {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      margin-bottom: 1.5rem;
+      font-style: italic;
+    }
+
+    .grid-canvas-wrap {
+      width: 100%;
+      background: #000;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    #gridCanvas {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    /* DIVIDER */
+    .section-divider {
+      max-width: 1200px;
+      margin: 3rem auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .divider-label {
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .divider-sub {
+      font-size: 10px;
+      color: var(--blush);
+      font-style: italic;
+      white-space: nowrap;
+    }
+
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* GENRE SECTION */
+    .genre-section {
+      max-width: 1200px;
+      margin: 0 auto 4rem;
+      padding: 0 2rem;
+    }
+
+    .genre-block {
+      margin-bottom: 3rem;
+    }
+
+    .genre-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 1.2rem;
+    }
+
+    .genre-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+    }
+
+    .genre-title-sub {
+      font-size: 10px;
+      color: var(--blush);
+      letter-spacing: 0.08em;
+      font-style: italic;
+      margin-left: 10px;
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+    }
+
+    .genre-nav {
+      display: flex;
+      gap: 6px;
+    }
+
+    .genre-nav-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all var(--transition);
+    }
+
+    .genre-nav-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .genre-carousel-outer {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .genre-carousel {
+      display: flex;
+      gap: 14px;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+
+    .genre-card {
+      flex-shrink: 0;
+      width: 140px;
+      cursor: pointer;
+      transition: opacity var(--transition);
+    }
+
+    .genre-card:hover {
+      opacity: 0.85;
+    }
+
+    .genre-card img {
+      width: 100%;
+      aspect-ratio: 2/3;
+      object-fit: cover;
+      display: block;
+      background: var(--surface);
+      box-shadow: var(--card-shadow);
+      transition: transform var(--transition);
+    }
+
+    .genre-card:hover img {
+      transform: translateY(-4px);
+    }
+
+    .genre-card-title {
+      margin-top: 8px;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .genre-card-score {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+      letter-spacing: 0.05em;
+    }
+
+    .genre-card-score .star {
+      color: var(--accent);
+    }
+
+    /* LOADING */
+    .loading-ring {
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 3rem auto;
+      display: none;
+    }
+
+    .loading-ring.visible {
+      display: block;
+    }
+
+    .loading-caption {
+      text-align: center;
+      color: var(--blush);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      font-style: italic;
+      margin-top: -2rem;
+      margin-bottom: 2rem;
+      display: none;
+    }
+
+    .loading-caption.visible {
+      display: block;
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+    }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--muted);
+      display: none;
+    }
+
+    .empty-state.visible {
+      display: block;
+    }
+
+    .empty-state-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 300;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .empty-state-sub {
+      color: var(--blush);
+      font-style: italic;
+      font-size: 12px;
+      margin-top: 0.5rem;
+    }
+
+    /* NOTIFICATION */
+    .notif {
+      position: fixed;
+      top: 70px;
+      right: 2rem;
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      color: var(--text);
+      padding: 10px 16px;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      z-index: 999;
+      animation: slideInRight 0.25s ease, fadeOut 0.3s ease 2.5s both;
+      pointer-events: none;
+    }
+
+    .notif.blush {
+      border-color: var(--blush);
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+      }
+
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+      }
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -200% 0;
+      }
+    }
+
+    @keyframes heroPulse {
+
+      0%,
+      100% {
+        opacity: 0.7;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.015);
+      }
+    }
+
+    @keyframes notifOut {
+      to {
+        transform: translateX(120%);
+        opacity: 0;
+      }
+    }
+
+    @keyframes modalPop {
+      from {
+        opacity: 0;
+        transform: scale(0.93) translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    @keyframes toolbarSlide {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* HEADER SCROLL SHADOW */
+    header {
+      transition: box-shadow 0.3s ease;
+    }
+
+    header.scrolled {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    /* HERO ENHANCED */
+    .hero {
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .hero-title {
+      animation: fadeUp 0.5s ease 0.05s both;
+    }
+
+    .hero-sub {
+      animation: fadeUp 0.5s ease 0.1s both;
+    }
+
+    .hero-disclaimer {
+      animation: fadeUp 0.5s ease 0.15s both;
+    }
+
+    .search-wrap {
+      animation: fadeUp 0.5s ease 0.2s both;
+    }
+
+    /* MANGA META CARD ANIMATION */
+    .manga-meta.visible {
+      animation: fadeUp 0.35s ease both;
+    }
+
+    .meta-cover img {
+      transition: transform 0.4s ease, box-shadow 0.3s ease;
+    }
+
+    .meta-cover img:hover {
+      transform: translateY(-4px) rotate(-1deg);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    /* COVER CARDS — staggered reveal */
+    .cover-card {
+      animation: fadeUp 0.3s ease both;
+    }
+
+    .cover-card:hover img {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
+    }
+
+    /* SELECTION TOOLBAR */
+    .selection-toolbar.visible {
+      animation: toolbarSlide 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+
+    /* GRID MODAL POP */
+    .modal-overlay.open .modal {
+      animation: modalPop 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+
+    /* LIGHTBOX FADE */
+    .lightbox {
+      backdrop-filter: blur(8px);
+      transition: background 0.2s ease;
+    }
+
+    .lightbox.open {
+      animation: fadeIn 0.2s ease;
+    }
+
+    /* GENRE CARD HOVER */
+    .genre-card {
+      transition: opacity var(--transition), transform 0.25s ease;
+    }
+
+    .genre-card:hover {
+      opacity: 1;
+      transform: translateY(-4px);
+    }
+
+    /* CLOSE BUTTON ROTATE */
+    button.lightbox-close,
+    button.modal-close {
+      transition: color var(--transition), transform var(--transition);
+    }
+
+    button.lightbox-close:hover {
+      transform: rotate(90deg);
+    }
+
+    /* NOTIF OUT */
+    .notif.leaving {
+      animation: notifOut 0.25s ease forwards;
+    }
+
+    /* SEARCH SPINNER */
+    .search-spinner {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+      pointer-events: none;
+    }
+
+    .search-spinner.visible {
+      display: block;
+    }
+
+    /* ERROR STATES */
+    .fetch-error {
+      text-align: center;
+      padding: 2rem;
+      color: var(--blush);
+      font-size: 11px;
+      font-style: italic;
+      letter-spacing: 0.08em;
+      animation: fadeUp 0.25s ease;
+    }
+
+    .fetch-error .retry-btn {
+      display: inline-block;
+      margin-top: 0.8rem;
+      padding: 6px 14px;
+      border: 1px solid var(--blush);
+      color: var(--blush);
+      background: none;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .fetch-error .retry-btn:hover {
+      background: var(--blush);
+      color: var(--bg);
+    }
+
+    /* BUILD 3x3 BUTTON SHIMMER WHEN READY */
+    #buildGridBtn:not(:disabled) {
+      animation: shimmerBtn 2.5s ease infinite;
+    }
+
+    @keyframes shimmerBtn {
+
+      0%,
+      100% {
+        box-shadow: none;
+      }
+
+      50% {
+        box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 40%, transparent);
+      }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 640px) {
+      .hero {
+        padding: 3rem 1.2rem 2rem;
+      }
+
+      .hero-title {
+        font-size: clamp(2rem, 8vw, 2.8rem);
+      }
+
+      .manga-meta.visible {
+        flex-direction: column;
+        padding: 0 1.2rem;
+        gap: 1rem;
+      }
+
+      .meta-cover {
+        width: 90px;
+      }
+
+      .meta-title {
+        font-size: 1.6rem;
+      }
+
+      .gallery-section,
+      .genre-section {
+        padding: 0 1.2rem 3rem;
+      }
+
+      .covers-grid {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        gap: 8px;
+      }
+
+      .lightbox-nav {
+        display: none;
+      }
+
+      .selection-toolbar {
+        padding: 12px 1.2rem;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .selection-toolbar>div {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .genre-card {
+        width: 110px;
+      }
+
+      header {
+        padding: 0 1.2rem;
+      }
+
+      .logo {
+        font-size: 1.3rem;
+      }
+
+      .logo-blush {
+        display: none;
+      }
+
+      .toolbar-hint {
+        display: none;
+      }
+
+      .gallery-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .covers-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+
+      .genre-card {
+        width: 95px;
+      }
+
+      .meta-actions {
+        gap: 6px;
+      }
+
+      .btn {
+        padding: 7px 12px;
+        font-size: 10px;
+      }
+    }
+
+    @media (min-width: 1400px) {
+      .covers-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--muted);
+    }
+
+    #offscreenCanvas {
+      display: none;
+    }
+  </style>
 </head>
+
 <body>
 
-<header>
-  <a href="/" class="logo">Tsun<span>dere</span><span class="logo-blush">hmpf.</span></a>
-  <div class="header-right">
-    <a href="builder.html" class="header-btn primary">Create 3×3</a>
-    <button class="header-btn" id="loginBtn">Login</button>
-    <button class="header-btn" id="themeToggle">Dark</button>
-    <div class="user-badge" id="userBadge" style="display: none;">
-      <img src="" alt="" id="userAvatar">
-      <span id="userName"></span>
+  <header id="siteHeader">
+    <a class="logo" href="#">Ts<span>un</span><span class="logo-blush">...it's not like I made this for you</span></a>
+    <div class="header-right">
+      <a href="builder.html"
+        style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;border:1px solid var(--border);color:var(--muted);padding:6px 12px;text-decoration:none;transition:all var(--transition);"
+        id="builderLink">3×3 Builder</a>
+      <button class="theme-toggle" id="themeToggle">Too bright</button>
+    </div>
+  </header>
+  <style>
+    #builderLink:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    #siteHeader {
+      transition: box-shadow 0.3s ease;
+    }
+  </style>
+
+  <section class="hero">
+    <h1 class="hero-title">It's not like I<br><em>saved these for you.</em></h1>
+    <p class="hero-sub">I just happened to archive every manga cover ever. Don't read into it.</p>
+    <p class="hero-disclaimer">...b-baka. Just search already.</p>
+    <div class="search-wrap">
+      <input type="text" class="search-input" id="searchInput" placeholder="Fine. Type a manga title, I guess..."
+        autocomplete="off" spellcheck="false">
+      <span class="search-icon" id="searchIconEl">&#x2315;</span>
+      <div class="search-spinner" id="searchSpinnerEl"></div>
+      <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+    </div>
+  </section>
+
+  <div class="manga-meta" id="mangaMeta">
+    <div class="meta-cover">
+      <img id="metaCoverImg" src="" alt="">
+    </div>
+    <div class="meta-info">
+      <h2 class="meta-title" id="metaTitle"></h2>
+      <div class="meta-tags" id="metaTags"></div>
+      <p class="meta-synopsis" id="metaSynopsis"></p>
+      <p class="meta-tsun-comment" id="metaTsunComment"></p>
+      <div class="meta-actions">
+        <button class="btn" id="selectModeBtn">Pick covers, I suppose</button>
+        <span class="selection-count" id="selectionCountLabel" style="display:none"></span>
+      </div>
     </div>
   </div>
-</header>
 
-<div class="hero">
-  <h1 class="hero-title">It's not like I <em>archived</em><br>these for you</h1>
-  <p class="hero-sub">Your personal manga archive</p>
-  <p class="hero-disclaimer">b-baka! i just had extra server space...</p>
-  
-  <div class="search-wrap">
-    <input type="text" class="search-input" id="searchInput" placeholder="search manga... if you want">
-    <span class="search-icon">⌕</span>
-    <div class="autocomplete-dropdown" id="autocomplete"></div>
+  <div id="galleryLoading" class="loading-ring"></div>
+  <div id="loadingCaption" class="loading-caption">Fetching covers... not because you asked. Just because.</div>
+
+  <section class="gallery-section" id="gallerySection">
+    <div class="gallery-header">
+      <span class="gallery-label" id="galleryLabel">finding covers...</span>
+    </div>
+    <div class="covers-grid" id="coversGrid"></div>
+    <div class="load-more-wrap" id="loadMoreWrap" style="display:none">
+      <button class="btn" id="loadMoreBtn">There's more. Not that I'm excited to show you.</button>
+    </div>
+  </section>
+
+  <div class="empty-state" id="emptyState">
+    <p class="empty-state-title">Nothing found.</p>
+    <p>I looked everywhere, okay? Don't blame me.</p>
+    <p class="empty-state-sub">...maybe try a different title. I-I'm only suggesting it for your sake.</p>
   </div>
 
-  <div class="color-filter">
-    <label class="color-filter-label">Filter by cover color (because you're picky)</label>
-    <div class="color-swatches">
-      <div class="color-swatch" data-color="all" style="background: linear-gradient(135deg, #c9a96e 0%, #c97070 100%);"></div>
-      <div class="color-swatch" data-color="red" style="background: #e74c3c;"></div>
-      <div class="color-swatch" data-color="blue" style="background: #3498db;"></div>
-      <div class="color-swatch" data-color="green" style="background: #2ecc71;"></div>
-      <div class="color-swatch" data-color="yellow" style="background: #f39c12;"></div>
-      <div class="color-swatch" data-color="purple" style="background: #9b59b6;"></div>
-      <div class="color-swatch" data-color="pink" style="background: #e91e63;"></div>
-      <div class="color-swatch" data-color="orange" style="background: #ff5722;"></div>
-      <div class="color-swatch" data-color="brown" style="background: #8b5e3c;"></div>
-      <div class="color-swatch" data-color="gray" style="background: #95a5a6;"></div>
-      <div class="color-swatch" data-color="black" style="background: #2c3e50;"></div>
-      <div class="color-swatch" data-color="white" style="background: #ecf0f1;"></div>
+  <div class="section-divider" id="genreDivider">
+    <span class="divider-label">Top manga by genre</span>
+    <div class="divider-line"></div>
+    <span class="divider-sub">don't thank me</span>
+  </div>
+
+  <section class="genre-section" id="genreSection">
+    <div id="genreBlocks"></div>
+  </section>
+
+  <div class="selection-toolbar" id="selectionToolbar">
+    <div class="toolbar-left">
+      <div>
+        <div class="toolbar-count" id="toolbarCount">0</div>
+        <div class="toolbar-label">chosen. happy now?</div>
+      </div>
+      <div class="grid-preview" id="gridPreview">
+        <div class="grid-preview-cell" data-idx="0"></div>
+        <div class="grid-preview-cell" data-idx="1"></div>
+        <div class="grid-preview-cell" data-idx="2"></div>
+        <div class="grid-preview-cell" data-idx="3"></div>
+        <div class="grid-preview-cell" data-idx="4"></div>
+        <div class="grid-preview-cell" data-idx="5"></div>
+        <div class="grid-preview-cell" data-idx="6"></div>
+        <div class="grid-preview-cell" data-idx="7"></div>
+        <div class="grid-preview-cell" data-idx="8"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <span class="toolbar-hint" style="font-size:10px;color:var(--muted);letter-spacing:0.1em">Pick exactly 9. I'm not
+        flexible about this.</span>
+      <button class="btn primary" id="buildGridBtn" disabled>Build the 3x3 already</button>
+      <button class="btn danger" id="clearSelectionBtn">Forget all of this</button>
     </div>
   </div>
-</div>
 
-<div class="genre-blocks" id="genreBlocks"></div>
-
-<!-- Login Modal -->
-<div class="modal-overlay" id="loginModal">
-  <div class="modal-content">
-    <button class="modal-close" id="closeLoginModal">×</button>
-    <h2 class="modal-title">Login</h2>
-    <p class="modal-text">Sign in with Google to save your 3×3 grids. Not that I care what you do with them...</p>
-    <button class="google-btn" id="googleLoginBtn">
-      <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-      Sign in with Google
-    </button>
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose">&#x2715;</button>
+    <button class="lightbox-nav prev" id="lightboxPrev">&#x2039;</button>
+    <div class="lightbox-inner">
+      <img class="lightbox-img" id="lightboxImg" src="" alt="" draggable="false">
+      <div class="lightbox-info" id="lightboxInfo"></div>
+    </div>
+    <button class="lightbox-nav next" id="lightboxNext">&#x203A;</button>
   </div>
-</div>
 
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script>
-const $ = id => document.getElementById(id);
-const BLANK_SVG = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg"%3E%3C/svg%3E';
+  <div class="modal-overlay" id="gridModal">
+    <div class="modal">
+      <h2 class="modal-title">Your 3x3 Grid</h2>
+      <p class="modal-sub">I made it for you. Don't get the wrong idea — it took two seconds.</p>
+      <div class="grid-canvas-wrap">
+        <canvas id="gridCanvas"></canvas>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="closeModal">Never mind</button>
+        <button class="btn primary" id="downloadGrid">Take it. Fine.</button>
+      </div>
+    </div>
+  </div>
 
-// Google OAuth Config - REPLACE WITH YOUR CLIENT ID
-const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+  <canvas id="offscreenCanvas"></canvas>
 
-// Auth state
-let currentUser = null;
+  <script>
+    // ===================== CONFIG =====================
+    const GOOGLE_CLIENT_ID = '899850205404-mkpt9ti98akido6pghg7aed55309b8mt.apps.googleusercontent.com';
+    const API_BASE_URL = 'https://tsun-backend.onrender.com'; // Point to your Render backend
 
-// Check for saved user
-const savedUser = localStorage.getItem('tsun_user');
-if (savedUser) {
-  currentUser = JSON.parse(savedUser);
-  updateUserUI();
-}
+    // ===================== TSUNDERE LINES =====================
+    const TSUN_COMMENTS = {
+      onLoad: ["...you came back. Whatever.", "I wasn't waiting for you.", "Don't assume I'm happy you're here."],
+      onSearch: ["Fine, I'll look it up.", "I already knew you'd search for this.", "Fetching. Don't stare."],
+      onCoversLoaded: ["There. Every cover. You're welcome.", "I found them all. Don't get used to it."],
+      onSelect: ["Picking covers? What are you making...", "Fine. Build your little grid."],
+      onDownload: ["You saved it. Good.", "Downloaded. Don't tell anyone I helped you."]
+    };
+    function tsunLine(category) {
+      const lines = TSUN_COMMENTS[category];
+      return lines[Math.floor(Math.random() * lines.length)];
+    }
+    const GENRE_TSUN = {
+      'Action': "...fine. explosions.",
+      'Romance': "d-don't look at me reading these",
+      'Fantasy': "i like the world-building. that's all.",
+      'Horror': "i'm not scared. you're scared.",
+      'Comedy': "i didn't laugh. my face just did that."
+    };
 
-function updateUserUI() {
-  if (currentUser) {
-    $('loginBtn').style.display = 'none';
-    $('userBadge').style.display = 'flex';
-    $('userAvatar').src = currentUser.picture;
-    $('userName').textContent = currentUser.name.split(' ')[0];
-  } else {
-    $('loginBtn').style.display = 'inline-block';
-    $('userBadge').style.display = 'none';
-  }
-}
+    // ===================== STATE =====================
+    const state = {
+      theme: 'dark', searchResults: [], currentManga: null, covers: [], displayedCovers: [],
+      perPage: 30, page: 0, totalCovers: 0, selectedCovers: new Set(), selectMode: false,
+      lightboxIndex: 0, genres: ['Action', 'Romance', 'Fantasy', 'Horror', 'Comedy'],
+      searchTimeout: null, acIndex: -1
+    };
 
-// Google Sign-In
-function handleCredentialResponse(response) {
-  const payload = JSON.parseFromString(atob(response.credential.split('.')[1]));
-  currentUser = {
-    id: payload.sub,
-    email: payload.email,
-    name: payload.name,
-    picture: payload.picture
-  };
-  localStorage.setItem('tsun_user', JSON.stringify(currentUser));
-  updateUserUI();
-  $('loginModal').classList.remove('open');
-  showNotif("Fine, you're logged in. Don't expect special treatment.", 'blush');
-}
+    // ===================== DOM REFS =====================
+    const $ = id => document.getElementById(id);
+    const themeToggle = $('themeToggle');
+    const searchInput = $('searchInput');
+    const acDropdown = $('autocompleteDropdown');
+    const mangaMeta = $('mangaMeta');
+    const gallerySection = $('gallerySection');
+    const galleryLoading = $('galleryLoading');
+    const loadingCaption = $('loadingCaption');
+    const coversGrid = $('coversGrid');
+    const galleryLabel = $('galleryLabel');
+    const loadMoreWrap = $('loadMoreWrap');
+    const loadMoreBtn = $('loadMoreBtn');
+    const emptyState = $('emptyState');
+    const selectionToolbar = $('selectionToolbar');
+    const toolbarCount = $('toolbarCount');
+    const buildGridBtn = $('buildGridBtn');
+    const clearSelectionBtn = $('clearSelectionBtn');
+    const lightbox = $('lightbox');
+    const lightboxImg = $('lightboxImg');
+    const lightboxInfo = $('lightboxInfo');
+    const lightboxClose = $('lightboxClose');
+    const lightboxPrev = $('lightboxPrev');
+    const lightboxNext = $('lightboxNext');
+    const gridModal = $('gridModal');
+    const gridCanvas = $('gridCanvas');
+    const downloadGrid = $('downloadGrid');
+    const closeModal = $('closeModal');
+    const selectModeBtn = $('selectModeBtn');
+    const selectionCountLabel = $('selectionCountLabel');
+    const genreBlocks = $('genreBlocks');
 
-window.addEventListener('load', () => {
-  if (window.google) {
-    google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: handleCredentialResponse
+    // ===================== THEME =====================
+    themeToggle.addEventListener('click', () => {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', state.theme);
+      themeToggle.textContent = state.theme === 'dark' ? 'Too bright' : 'Too dark';
     });
-  }
-});
 
-$('loginBtn').addEventListener('click', () => {
-  if (!currentUser) {
-    $('loginModal').classList.add('open');
-  }
-});
-
-$('googleLoginBtn').addEventListener('click', () => {
-  if (window.google) {
-    google.accounts.id.prompt();
-  } else {
-    showNotif("Google SDK not loaded. Check your connection, genius.", 'blush');
-  }
-});
-
-$('closeLoginModal').addEventListener('click', () => {
-  $('loginModal').classList.remove('open');
-});
-
-$('loginModal').addEventListener('click', e => {
-  if (e.target === $('loginModal')) {
-    $('loginModal').classList.remove('open');
-  }
-});
-
-// Logout
-$('userBadge').addEventListener('click', () => {
-  if (confirm("Log out? All your grids will be lost... forever. (Just kidding, they're in localStorage)")) {
-    currentUser = null;
-    localStorage.removeItem('tsun_user');
-    updateUserUI();
-    showNotif("Whatever. You'll be back.", 'blush');
-  }
-});
-
-// Theme toggle
-const themeToggle = $('themeToggle');
-const html = document.documentElement;
-const savedTheme = localStorage.getItem('tsun_theme') || 'dark';
-html.setAttribute('data-theme', savedTheme);
-themeToggle.textContent = savedTheme === 'dark' ? 'Dark' : 'Light';
-
-themeToggle.addEventListener('click', () => {
-  const current = html.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
-  html.setAttribute('data-theme', next);
-  themeToggle.textContent = next === 'dark' ? 'Dark' : 'Light';
-  localStorage.setItem('tsun_theme', next);
-});
-
-// Search & Autocomplete
-const searchInput = $('searchInput');
-const autocomplete = $('autocomplete');
-let searchTimeout;
-let acResults = [];
-let acIndex = -1;
-let selectedColor = 'all';
-
-searchInput.addEventListener('input', e => {
-  clearTimeout(searchTimeout);
-  const query = e.target.value.trim();
-  if (query.length < 2) {
-    autocomplete.classList.remove('open');
-    return;
-  }
-  searchTimeout = setTimeout(() => searchManga(query), 300);
-});
-
-async function searchManga(query) {
-  try {
-    const url = `https://api.jikan.moe/v4/manga?q=${encodeURIComponent(query)}&limit=8&type=manga&sfw=false`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Search failed');
-    const data = await res.json();
-    acResults = data.data || [];
-    renderAutocomplete();
-  } catch(e) {
-    console.warn('Search error:', e);
-  }
-}
-
-function renderAutocomplete() {
-  if (!acResults.length) {
-    autocomplete.classList.remove('open');
-    return;
-  }
-  autocomplete.innerHTML = acResults.map((m, i) => `
-    <div class="autocomplete-item${i === acIndex ? ' active' : ''}" data-index="${i}">
-      <img class="autocomplete-thumb" src="${m.images?.jpg?.small_image_url || BLANK_SVG}" alt="">
-      <div class="autocomplete-info">
-        <span class="name">${escHtml(m.title)}</span>
-        <span class="meta">${m.type || 'Manga'} · ${m.volumes || '?'} vol</span>
-      </div>
-    </div>
-  `).join('');
-  autocomplete.classList.add('open');
-
-  autocomplete.querySelectorAll('.autocomplete-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const manga = acResults[parseInt(item.dataset.index)];
-      window.location.href = `builder.html?add=${manga.mal_id}`;
+    // ===================== SEARCH =====================
+    searchInput.addEventListener('input', () => {
+      clearTimeout(state.searchTimeout);
+      const q = searchInput.value.trim();
+      if (q.length < 2) { closeDropdown(); return; }
+      state.searchTimeout = setTimeout(() => fetchSuggestions(q), 380);
     });
-  });
-}
-
-searchInput.addEventListener('keydown', e => {
-  if (!autocomplete.classList.contains('open')) return;
-  if (e.key === 'ArrowDown') {
-    e.preventDefault();
-    acIndex = Math.min(acIndex + 1, acResults.length - 1);
-    renderAutocomplete();
-  } else if (e.key === 'ArrowUp') {
-    e.preventDefault();
-    acIndex = Math.max(acIndex - 1, -1);
-    renderAutocomplete();
-  } else if (e.key === 'Enter' && acIndex >= 0) {
-    e.preventDefault();
-    const manga = acResults[acIndex];
-    window.location.href = `builder.html?add=${manga.mal_id}`;
-  } else if (e.key === 'Escape') {
-    autocomplete.classList.remove('open');
-    acIndex = -1;
-  }
-});
-
-document.addEventListener('click', e => {
-  if (!searchInput.contains(e.target) && !autocomplete.contains(e.target)) {
-    autocomplete.classList.remove('open');
-  }
-});
-
-// Color filter
-document.querySelectorAll('.color-swatch').forEach(swatch => {
-  swatch.addEventListener('click', () => {
-    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-    swatch.classList.add('active');
-    selectedColor = swatch.dataset.color;
-    reloadGenres();
-    showNotif(selectedColor === 'all' ? "Showing everything. Happy now?" : `Filtered to ${selectedColor}. You're so demanding.`, 'blush');
-  });
-});
-
-// Activate "all" by default
-document.querySelector('[data-color="all"]').classList.add('active');
-
-// Genre carousels
-const genreBlocks = $('genreBlocks');
-const GENRE_IDS = { 
-  'Action': 1, 
-  'Romance': 22, 
-  'Fantasy': 10, 
-  'Horror': 14, 
-  'Comedy': 4,
-  'Drama': 8,
-  'Mystery': 7,
-  'Sci-Fi': 24
-};
-const GENRE_TSUN = {
-  'Action': 'not that exciting tbh',
-  'Romance': 'so predictable',
-  'Fantasy': 'too unrealistic',
-  'Horror': "doesn't even scare me",
-  'Comedy': "i didn't laugh",
-  'Drama': 'too emotional',
-  'Mystery': 'saw it coming',
-  'Sci-Fi': 'too nerdy'
-};
-
-const COLOR_KEYWORDS = {
-  red: ['red', 'crimson', 'scarlet', 'blood', 'ruby'],
-  blue: ['blue', 'azure', 'ocean', 'sky', 'sapphire'],
-  green: ['green', 'emerald', 'forest', 'jade'],
-  yellow: ['yellow', 'gold', 'golden', 'amber'],
-  purple: ['purple', 'violet', 'amethyst', 'lavender'],
-  pink: ['pink', 'rose', 'magenta', 'cherry'],
-  orange: ['orange', 'sunset', 'flame'],
-  brown: ['brown', 'sepia', 'chocolate'],
-  gray: ['gray', 'grey', 'silver', 'steel'],
-  black: ['black', 'dark', 'noir', 'shadow'],
-  white: ['white', 'snow', 'pearl', 'ivory']
-};
-
-let loadedGenres = new Set();
-
-async function loadGenres() {
-  genreBlocks.innerHTML = '';
-  loadedGenres.clear();
-  
-  for (const [genre, genreId] of Object.entries(GENRE_IDS)) {
-    const block = document.createElement('div');
-    block.className = 'genre-block';
-    block.id = `genre-${genre}`;
-    block.innerHTML = `
-      <div class="genre-header">
-        <h2 class="genre-title">${genre}<span class="genre-title-sub">${GENRE_TSUN[genre] || ''}</span></h2>
-        <div class="genre-nav">
-          <button class="genre-nav-btn" data-genre="${genre}" data-dir="-1">‹</button>
-          <button class="genre-nav-btn" data-genre="${genre}" data-dir="1">›</button>
-        </div>
-      </div>
-      <div class="genre-carousel-outer">
-        <div class="genre-carousel" id="carousel-${genre}">
-          ${Array(6).fill(0).map(() => `<div class="genre-card"><div style="width:140px;aspect-ratio:2/3;" class="skeleton"></div></div>`).join('')}
-        </div>
-      </div>
-    `;
-    genreBlocks.appendChild(block);
-    
-    // Stagger API calls to avoid rate limiting (increased delay)
-    await new Promise(r => setTimeout(r, 600));
-    fetchGenre(genre, genreId);
-  }
-
-  // Navigation
-  genreBlocks.addEventListener('click', e => {
-    const btn = e.target.closest('.genre-nav-btn');
-    if (!btn) return;
-    const carousel = $(`carousel-${btn.dataset.genre}`);
-    if (!carousel) return;
-    const cardW = 140 + 14;
-    const dir = parseInt(btn.dataset.dir);
-    const current = carousel._offset || 0;
-    const maxScroll = Math.max(0, carousel.children.length * cardW - carousel.parentElement.offsetWidth - 14);
-    carousel._offset = Math.max(0, Math.min(maxScroll, current + dir * cardW * 3));
-    carousel.style.transform = `translateX(-${carousel._offset}px)`;
-  });
-}
-
-async function fetchGenre(genre, genreId, retryCount = 0) {
-  try {
-    let url = `https://api.jikan.moe/v4/manga?genres=${genreId}&order_by=popularity&sort=asc&limit=20&type=manga&sfw=false`;
-    
-    const res = await fetch(url);
-    if (!res.ok) {
-      if (res.status === 429 && retryCount < 3) {
-        // Rate limited, retry with exponential backoff
-        const delay = 1000 * Math.pow(2, retryCount);
-        await new Promise(r => setTimeout(r, delay));
-        return fetchGenre(genre, genreId, retryCount + 1);
+    async function fetchSuggestions(query, autoSelect = false) {
+      try {
+        const url = `https://api.jikan.moe/v4/manga?q=${encodeURIComponent(query)}&limit=8&sfw=false`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('API Error');
+        const data = await res.json();
+        renderDropdown(data.data || []);
+      } catch (e) {
+        console.error(e);
       }
-      throw new Error(`HTTP ${res.status}`);
     }
-    
-    const data = await res.json();
-    if (!data.data || !data.data.length) return;
-
-    let manga = data.data;
-
-    // Color filtering
-    if (selectedColor !== 'all') {
-      manga = manga.filter(m => {
-        const title = (m.title || '').toLowerCase();
-        const synopsis = (m.synopsis || '').toLowerCase();
-        const keywords = COLOR_KEYWORDS[selectedColor] || [];
-        return keywords.some(kw => title.includes(kw) || synopsis.includes(kw));
+    function renderDropdown(results) {
+      if (!results.length) { closeDropdown(); return; }
+      acDropdown.innerHTML = results.map((m, i) => `
+    <div class="autocomplete-item" data-idx="${i}">
+      <img class="autocomplete-thumb" src="${m.images?.jpg?.small_image_url || ''}" alt="">
+      <div class="autocomplete-info"><span class="name">${escHtml(m.title)}</span></div>
+    </div>`).join('');
+      acDropdown.classList.add('open');
+      acDropdown.querySelectorAll('.autocomplete-item').forEach((el, i) => {
+        el.addEventListener('click', () => selectManga(results[i]));
       });
     }
+    function closeDropdown() { acDropdown.classList.remove('open'); }
+    function escHtml(str) { return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
 
-    const carousel = $(`carousel-${genre}`);
-    if (!carousel) return;
-
-    if (manga.length === 0) {
-      carousel.innerHTML = `<p style="color:var(--muted);font-size:11px;padding:1rem;font-style:italic;">no ${selectedColor} covers found. typical.</p>`;
-      return;
+    // ===================== SELECT MANGA =====================
+    async function selectManga(manga) {
+      closeDropdown();
+      searchInput.value = manga.title;
+      state.currentManga = manga;
+      state.covers = [];
+      state.displayedCovers = [];
+      state.page = 0;
+      state.selectedCovers.clear();
+      state.selectMode = false;
+      selectModeBtn.textContent = 'Pick covers, I suppose';
+      updateSelectionUI();
+      renderMeta(manga);
+      showNotif(tsunLine('onSearch'), 'blush');
+      await fetchCovers(manga);
     }
 
-    carousel.innerHTML = manga.slice(0, 15).map(m => `
-      <div class="genre-card" data-mal="${m.mal_id}">
-        <img
-          src="${m.images?.jpg?.image_url || ''}"
-          alt="${escHtml(m.title)}"
-          loading="lazy"
-          onerror="this.src='${BLANK_SVG}'">
-        <div class="genre-card-title">${escHtml(m.title)}</div>
-        <div class="genre-card-score">
-          <span class="star">▲</span> ${m.score || 'N/A'}
-          <span style="margin-left:4px;color:var(--border)">|</span>
-          ${m.volumes ? m.volumes + ' vol' : m.chapters ? m.chapters + ' ch' : '?'}
-        </div>
-      </div>
-    `).join('');
+    function renderMeta(m) {
+      $('metaCoverImg').src = m.images?.jpg?.large_image_url || '';
+      $('metaTitle').textContent = m.title;
+      $('metaTags').innerHTML = (m.genres || []).slice(0, 3).map(g => `<span class="tag">${escHtml(g.name)}</span>`).join('');
+      $('metaSynopsis').textContent = m.synopsis || 'No synopsis.';
+      $('metaTsunComment').textContent = "I've read this. Not saying I recommend it.";
+      mangaMeta.classList.add('visible');
+    }
 
-    carousel.querySelectorAll('.genre-card').forEach((card, i) => {
-      card.addEventListener('click', () => {
-        const m = manga[i];
-        window.location.href = `builder.html?add=${m.mal_id}`;
+    async function fetchCovers(manga) {
+      gallerySection.classList.remove('visible');
+      galleryLoading.classList.add('visible');
+      try {
+        // Try Jikan first (Simpler for demo, MangaDex requires more logic)
+        const res = await fetch(`https://api.jikan.moe/v4/manga/${manga.mal_id}/pictures`);
+        const data = await res.json();
+        state.covers = (data.data || []).map((p, i) => ({
+          url: p.jpg?.large_image_url, volume: `Cover ${i + 1}`
+        }));
+        finishLoadingCovers();
+      } catch (e) {
+        galleryLoading.classList.remove('visible');
+        showNotif("Nothing found.", 'blush');
+      }
+    }
+
+    function finishLoadingCovers() {
+      state.totalCovers = state.covers.length;
+      galleryLoading.classList.remove('visible');
+      gallerySection.classList.add('visible');
+      galleryLabel.innerHTML = `&#x2014; <span>${state.totalCovers}</span> covers collected.`;
+      renderNextPage();
+    }
+
+    function renderNextPage() {
+      const start = state.page * state.perPage;
+      const end = Math.min(start + state.perPage, state.covers.length);
+      state.covers.slice(start, end).forEach((cover, idx) => {
+        const absIdx = start + idx;
+        const card = document.createElement('div');
+        card.className = 'cover-card';
+        card.innerHTML = `<div class="cover-select-badge">&#x2714;</div><img src="${cover.url}">`;
+        card.addEventListener('click', () => {
+          if (state.selectMode) toggleSelectCover(card, absIdx);
+          else openLightbox(absIdx);
+        });
+        coversGrid.appendChild(card);
+      });
+      state.page++;
+      loadMoreWrap.style.display = end < state.covers.length ? 'block' : 'none';
+    }
+    loadMoreBtn.addEventListener('click', renderNextPage);
+
+    // ===================== SELECT MODE & BUILD =====================
+    selectModeBtn.addEventListener('click', () => {
+      state.selectMode = !state.selectMode;
+      selectModeBtn.textContent = state.selectMode ? 'Stop picking' : 'Pick covers';
+      if (!state.selectMode) { state.selectedCovers.clear(); updateSelectionUI(); }
+    });
+
+    function toggleSelectCover(card, idx) {
+      if (state.selectedCovers.has(idx)) {
+        state.selectedCovers.delete(idx);
+        card.classList.remove('selected');
+      } else {
+        if (state.selectedCovers.size >= 9) { showNotif("9 is the limit.", 'blush'); return; }
+        state.selectedCovers.add(idx);
+        card.classList.add('selected');
+      }
+      updateSelectionUI();
+    }
+
+    function updateSelectionUI() {
+      const count = state.selectedCovers.size;
+      toolbarCount.textContent = count;
+      buildGridBtn.disabled = count !== 9;
+      selectionToolbar.classList.toggle('visible', count > 0);
+      document.querySelectorAll('.grid-preview-cell').forEach((cell, i) => cell.classList.toggle('filled', i < count));
+    }
+
+    // ⚠️ PROXY FIX FOR INDEX PAGE
+    buildGridBtn.addEventListener('click', async () => {
+      if (state.selectedCovers.size !== 9) return;
+      const indices = Array.from(state.selectedCovers).sort((a, b) => a - b);
+      const urls = indices.map(i => state.covers[i].url);
+
+      gridModal.classList.add('open');
+      const canvas = gridCanvas;
+      const ctx = canvas.getContext('2d');
+      const size = 200, gap = 4;
+      canvas.width = size * 3 + gap * 2;
+      canvas.height = size * 1.5 * 3 + gap * 2;
+      ctx.fillStyle = '#0a0a0a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const images = await Promise.all(urls.map(url => new Promise(resolve => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        // Use the backend proxy if available!
+        if (API_BASE_URL && !API_BASE_URL.includes('localhost')) {
+          img.src = `${API_BASE_URL}/api/proxy?url=${encodeURIComponent(url)}`;
+        } else {
+          img.src = url;
+        }
+      })));
+
+      images.forEach((img, i) => {
+        const col = i % 3, row = Math.floor(i / 3);
+        if (img) ctx.drawImage(img, col * (size + gap), row * (size * 1.5 + gap), size, size * 1.5);
       });
     });
 
-    loadedGenres.add(genre);
+    downloadGrid.addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = `tsun-index-${Date.now()}.png`;
+      link.href = gridCanvas.toDataURL('image/png');
+      link.click();
+    });
 
-  } catch(e) {
-    console.warn(`Genre "${genre}" failed:`, e);
-    const carousel = $(`carousel-${genre}`);
-    if (carousel) {
-      carousel.innerHTML = `<p style="color:var(--muted);font-size:11px;padding:1rem;font-style:italic;">couldn't load these. not my fault.</p>`;
+    closeModal.onclick = () => gridModal.classList.remove('open');
+
+    // ===================== GENRES & INIT =====================
+    async function loadGenres() {
+      for (const g of state.genres) {
+        const block = document.createElement('div');
+        block.innerHTML = `<h2 class="genre-title">${g}</h2><div class="genre-carousel" id="cat-${g}"></div>`;
+        genreBlocks.appendChild(block);
+        // Fetch top 5 for demo
+        const res = await fetch(`https://api.jikan.moe/v4/manga?q=&order_by=popularity&limit=5&genres=${g === 'Action' ? 1 : g === 'Romance' ? 22 : 10}`);
+        const data = await res.json();
+        $(`cat-${g}`).innerHTML = (data.data || []).map(m => `<div class="genre-card"><img src="${m.images.jpg.image_url}"></div>`).join('');
+      }
     }
-  }
-}
 
-function reloadGenres() {
-  loadGenres();
-}
+    function showNotif(msg, type = '') {
+      const el = document.createElement('div');
+      el.className = `notif ${type}`;
+      el.textContent = msg;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }
 
-// Utils
-function escHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
+    // Lightbox
+    function openLightbox(idx) {
+      lightboxImg.src = state.covers[idx].url;
+      lightbox.classList.add('open');
+    }
+    lightboxClose.onclick = () => lightbox.classList.remove('open');
 
-function showNotif(msg, type = '') {
-  const el = document.createElement('div');
-  el.className = `notif${type ? ' ' + type : ''}`;
-  el.textContent = msg;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 3200);
-}
-
-const TSUN_LINES = {
-  onLoad: [
-    "Don't get used to this.",
-    "I compiled these covers by accident.",
-    "It's not like I wanted you here.",
-    "Whatever. Just look around."
-  ]
-};
-
-function tsunLine(key) {
-  const lines = TSUN_LINES[key] || ['...'];
-  return lines[Math.floor(Math.random() * lines.length)];
-}
-
-// Init
-loadGenres();
-showNotif(tsunLine('onLoad'), 'blush');
-</script>
+    loadGenres();
+    showNotif(tsunLine('onLoad'), 'blush');
+  </script>
 </body>
+
 </html>

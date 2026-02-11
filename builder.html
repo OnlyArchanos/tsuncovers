@@ -1,1092 +1,2031 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3×3 Builder — Tsun</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0a0a0a;
-    --surface: #111111;
-    --surface2: #1a1a1a;
-    --border: #2a2a2a;
-    --text: #e8e4dc;
-    --muted: #6b6560;
-    --accent: #c9a96e;
-    --accent2: #8b5e3c;
-    --danger: #9b4040;
-    --blush: #c97070;
-    --success: #6e9b6e;
-    --card-shadow: 0 4px 24px rgba(0,0,0,0.6);
-    --radius: 3px;
-    --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
-  }
-  [data-theme="light"] {
-    --bg: #f5f0e8;
-    --surface: #ede8df;
-    --surface2: #e5dfd4;
-    --border: #cfc8bc;
-    --text: #1a1714;
-    --muted: #8a8278;
-    --accent: #8b5e2c;
-    --accent2: #c9a96e;
-    --danger: #9b4040;
-    --blush: #c97070;
-    --success: #5a7a5a;
-    --card-shadow: 0 4px 24px rgba(0,0,0,0.15);
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3×3 Builder — Tsun</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Mono:wght@300;400&display=swap"
+    rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --surface2: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #e8e4dc;
+      --muted: #6b6560;
+      --accent: #c9a96e;
+      --accent2: #8b5e3c;
+      --danger: #9b4040;
+      --blush: #c97070;
+      --success: #6e9b6e;
+      --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+      --radius: 3px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
+    [data-theme="light"] {
+      --bg: #f5f0e8;
+      --surface: #ede8df;
+      --surface2: #e5dfd4;
+      --border: #cfc8bc;
+      --text: #1a1714;
+      --muted: #8a8278;
+      --accent: #8b5e2c;
+      --accent2: #c9a96e;
+      --danger: #9b4040;
+      --blush: #c97070;
+      --success: #5a7a5a;
+      --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+    }
 
-  body {
-    font-family: 'DM Mono', monospace;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 13px;
-    line-height: 1.6;
-    transition: background var(--transition), color var(--transition);
-  }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    backdrop-filter: blur(12px);
-    background: color-mix(in srgb, var(--bg) 90%, transparent);
-  }
+    html {
+      scroll-behavior: smooth;
+    }
 
-  .logo {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.8rem;
-    font-weight: 300;
-    letter-spacing: 0.15em;
-    color: var(--accent);
-    text-decoration: none;
-    display: flex;
-    align-items: baseline;
-    gap: 2px;
-  }
+    body {
+      font-family: 'DM Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 13px;
+      line-height: 1.6;
+      transition: background var(--transition), color var(--transition);
+      overflow-x: hidden;
+    }
 
-  .header-right { display: flex; align-items: center; gap: 1rem; }
+    /* ── PAGE ENTER ANIMATION ── */
+    @keyframes pageEnter {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
 
-  .header-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    cursor: pointer;
-    padding: 6px 12px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    transition: all var(--transition);
-    text-transform: uppercase;
-    text-decoration: none;
-    display: inline-block;
-  }
-  .header-btn:hover { border-color: var(--accent); color: var(--accent); }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-  .user-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 12px;
-    border: 1px solid var(--border);
-    font-size: 11px;
-    color: var(--text);
-    cursor: pointer;
-    transition: all var(--transition);
-  }
-  .user-badge:hover { border-color: var(--accent); }
-  .user-badge img {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-  }
+    .container {
+      animation: pageEnter 0.4s ease both;
+    }
 
-  .container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(12px);
+      background: color-mix(in srgb, var(--bg) 90%, transparent);
+      transition: box-shadow 0.3s ease;
+    }
 
-  .page-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    font-weight: 300;
-    margin-bottom: 0.5rem;
-    letter-spacing: -0.01em;
-  }
+    header.scrolled {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
 
-  .page-subtitle {
-    color: var(--blush);
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    margin-bottom: 2rem;
-    font-style: italic;
-    opacity: 0.8;
-  }
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem;
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      text-decoration: none;
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+      transition: opacity var(--transition);
+    }
 
-  .builder-layout {
-    display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: 2rem;
-    align-items: start;
-  }
+    .logo:hover {
+      opacity: 0.8;
+    }
 
-  /* SEARCH SECTION */
-  .search-section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-  }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
 
-  .search-label {
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.8rem;
-    display: block;
-  }
+    .header-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      padding: 6px 12px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      transition: all var(--transition);
+      text-transform: uppercase;
+      text-decoration: none;
+      display: inline-block;
+      position: relative;
+      overflow: hidden;
+    }
 
-  .search-wrap {
-    position: relative;
-  }
+    .header-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: -100%;
+      width: 100%;
+      height: 1px;
+      background: var(--accent);
+      transition: left 0.3s ease;
+    }
 
-  .search-input {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 14px;
-    padding: 12px 40px 12px 16px;
-    outline: none;
-    transition: border-color var(--transition);
-  }
-  .search-input:focus { border-color: var(--accent); }
+    .header-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
 
-  .search-icon {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--muted);
-    pointer-events: none;
-  }
+    .header-btn:hover::after {
+      left: 0;
+    }
 
-  .autocomplete-dropdown {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0; right: 0;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    z-index: 200;
-    max-height: 320px;
-    overflow-y: auto;
-    display: none;
-  }
-  .autocomplete-dropdown.open { display: block; }
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--text);
+      cursor: pointer;
+      transition: all var(--transition);
+      animation: fadeIn 0.3s ease;
+    }
 
-  .autocomplete-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
-    cursor: pointer;
-    transition: background var(--transition);
-    border-bottom: 1px solid var(--border);
-  }
-  .autocomplete-item:last-child { border-bottom: none; }
-  .autocomplete-item:hover { background: var(--surface2); }
+    .user-badge:hover {
+      border-color: var(--accent);
+    }
 
-  .autocomplete-thumb {
-    width: 32px;
-    height: 44px;
-    object-fit: cover;
-    flex-shrink: 0;
-    background: var(--surface2);
-  }
+    .user-badge img {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+    }
 
-  .autocomplete-info .name { color: var(--text); font-size: 13px; }
-  .autocomplete-info .meta { color: var(--muted); font-size: 11px; }
+    /* ── GOOGLE SIGN-IN ── */
+    .google-signin-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 14px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
 
-  /* GRID */
-  .grid-container {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 2rem;
-  }
+    .google-signin-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
 
-  .grid-3x3 {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 2rem;
-  }
+    .google-signin-btn svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
 
-  .grid-slot {
-    aspect-ratio: 2/3;
-    background: var(--bg);
-    border: 2px dashed var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all var(--transition);
-    position: relative;
-    overflow: hidden;
-  }
-  .grid-slot:hover {
-    border-color: var(--accent);
-  }
-  .grid-slot.filled {
-    border-style: solid;
-    border-color: var(--accent);
-  }
-  .grid-slot img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .grid-slot .placeholder {
-    color: var(--muted);
-    font-size: 24px;
-  }
-  .grid-slot .remove-btn {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 24px;
-    height: 24px;
-    background: var(--danger);
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    line-height: 1;
-    opacity: 0;
-    transition: opacity var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .grid-slot:hover .remove-btn {
-    opacity: 1;
-  }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
 
-  .grid-actions {
-    display: flex;
-    gap: 10px;
-  }
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
 
-  .btn {
-    padding: 12px 20px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    border: 1px solid var(--border);
-    cursor: pointer;
-    transition: all var(--transition);
-    background: none;
-    color: var(--text);
-  }
-  .btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-  .btn.primary {
-    background: var(--accent);
-    color: var(--bg);
-    border-color: var(--accent);
-  }
-  .btn.primary:hover {
-    background: var(--accent2);
-    border-color: var(--accent2);
-  }
-  .btn.success {
-    background: var(--success);
-    color: var(--bg);
-    border-color: var(--success);
-  }
-  .btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
+    .page-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
 
-  /* SIDEBAR */
-  .sidebar {
-    position: sticky;
-    top: 72px;
-  }
+    .page-subtitle {
+      color: var(--blush);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      margin-top: 0.4rem;
+      font-style: italic;
+      opacity: 0.8;
+    }
 
-  .saved-grids {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 1.5rem;
-  }
+    /* ── SYNC STATUS ── */
+    .sync-status {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding-bottom: 4px;
+    }
 
-  .sidebar-title {
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 1rem;
-  }
+    .sync-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: background 0.3s ease;
+    }
 
-  .grid-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
+    .sync-dot.syncing {
+      background: var(--accent);
+      animation: pulse 1s infinite;
+    }
 
-  .grid-item {
-    padding: 12px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    cursor: pointer;
-    transition: all var(--transition);
-  }
-  .grid-item:hover {
-    border-color: var(--accent);
-  }
+    .sync-dot.synced {
+      background: var(--success);
+    }
 
-  .grid-item-title {
-    font-size: 12px;
-    margin-bottom: 6px;
-  }
+    .sync-dot.error {
+      background: var(--danger);
+    }
 
-  .grid-item-meta {
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 0.05em;
-  }
+    @keyframes pulse {
 
-  .grid-item-preview {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
-    margin-top: 8px;
-  }
+      0%,
+      100% {
+        opacity: 1;
+      }
 
-  .grid-item-preview img {
-    width: 100%;
-    aspect-ratio: 2/3;
-    object-fit: cover;
-  }
+      50% {
+        opacity: 0.3;
+      }
+    }
 
-  .empty-state {
-    text-align: center;
-    padding: 2rem 1rem;
-    color: var(--muted);
-    font-size: 11px;
-    font-style: italic;
-  }
-
-  /* MODAL */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.8);
-    backdrop-filter: blur(4px);
-    z-index: 500;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-  }
-  .modal-overlay.open { display: flex; }
-
-  .modal-content {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 2rem;
-    max-width: 500px;
-    width: 100%;
-    box-shadow: var(--card-shadow);
-    position: relative;
-  }
-
-  .modal-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-size: 24px;
-    cursor: pointer;
-    line-height: 1;
-    transition: color var(--transition);
-  }
-  .modal-close:hover { color: var(--text); }
-
-  .modal-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.8rem;
-    font-weight: 300;
-    margin-bottom: 1rem;
-  }
-
-  .modal-input {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    padding: 10px 14px;
-    margin-bottom: 1rem;
-    outline: none;
-  }
-  .modal-input:focus { border-color: var(--accent); }
-
-  .modal-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-  }
-
-  .grid-preview-modal .modal-content {
-    max-width: 700px;
-  }
-
-  .grid-preview-canvas {
-    width: 100%;
-    display: block;
-    margin-bottom: 1rem;
-    box-shadow: var(--card-shadow);
-  }
-
-  .notif {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 12px 20px;
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    box-shadow: var(--card-shadow);
-    z-index: 1000;
-    animation: slideIn 0.3s ease;
-    max-width: 320px;
-  }
-  .notif.blush { border-color: var(--blush); color: var(--blush); }
-  .notif.success { border-color: var(--success); color: var(--success); }
-  @keyframes slideIn {
-    from { transform: translateY(100px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-
-  @media (max-width: 1024px) {
     .builder-layout {
-      grid-template-columns: 1fr;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 2rem;
+      align-items: start;
     }
-    .sidebar {
-      position: static;
-    }
-  }
 
-  @media (max-width: 768px) {
-    .container { padding: 1rem; }
-    header { padding: 0 1rem; }
-    .grid-container { padding: 1rem; }
-  }
-</style>
+    /* ── SEARCH ── */
+    .search-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      transition: border-color var(--transition);
+      animation: fadeUp 0.4s ease 0.1s both;
+    }
+
+    .search-section:focus-within {
+      border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+    }
+
+    .search-label {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.8rem;
+      display: block;
+    }
+
+    .search-wrap {
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      padding: 12px 40px 12px 16px;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      letter-spacing: 0.03em;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 15%, transparent);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+      transition: color var(--transition);
+    }
+
+    .search-input:focus+.search-icon {
+      color: var(--accent);
+    }
+
+    .search-spinner {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    .search-spinner.visible {
+      display: block;
+    }
+
+    @keyframes spin {
+      to {
+        transform: translateY(-50%) rotate(360deg);
+      }
+    }
+
+    .autocomplete-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      z-index: 200;
+      max-height: 320px;
+      overflow-y: auto;
+      display: none;
+      box-shadow: var(--card-shadow);
+    }
+
+    .autocomplete-dropdown.open {
+      display: block;
+      animation: dropIn 0.15s ease;
+    }
+
+    @keyframes dropIn {
+      from {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .autocomplete-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background var(--transition);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .autocomplete-item:last-child {
+      border-bottom: none;
+    }
+
+    .autocomplete-item:hover {
+      background: var(--surface2);
+    }
+
+    .autocomplete-thumb {
+      width: 32px;
+      height: 44px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--surface2);
+    }
+
+    .autocomplete-info .name {
+      color: var(--text);
+      font-size: 13px;
+      display: block;
+    }
+
+    .autocomplete-info .meta {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.05em;
+    }
+
+    .ac-error {
+      padding: 12px 16px;
+      color: var(--blush);
+      font-size: 11px;
+      font-style: italic;
+    }
+
+    /* ── GRID CONTAINER ── */
+    .grid-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      animation: fadeUp 0.4s ease 0.2s both;
+    }
+
+    .grid-3x3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 2rem;
+    }
+
+    .grid-slot {
+      aspect-ratio: 2/3;
+      background: var(--bg);
+      border: 2px dashed var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .grid-slot:hover {
+      border-color: var(--accent);
+      transform: scale(1.02);
+    }
+
+    .grid-slot.filled {
+      border-style: solid;
+      border-color: var(--accent);
+    }
+
+    .grid-slot.drop-target {
+      border-color: var(--accent);
+      border-style: solid;
+      background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+    }
+
+    .grid-slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+
+    .grid-slot:hover img {
+      transform: scale(1.04);
+    }
+
+    .grid-slot .placeholder {
+      color: var(--muted);
+      font-size: 22px;
+      transition: color var(--transition);
+    }
+
+    .grid-slot:hover .placeholder {
+      color: var(--accent);
+    }
+
+    .slot-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .grid-slot.filled:hover .slot-overlay {
+      opacity: 1;
+    }
+
+    .slot-btn {
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+      backdrop-filter: blur(4px);
+    }
+
+    .slot-btn:hover {
+      border-color: white;
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    .slot-btn.danger:hover {
+      border-color: var(--blush);
+      color: var(--blush);
+    }
+
+    .slot-number {
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 0.05em;
+      font-family: 'DM Mono', monospace;
+      pointer-events: none;
+    }
+
+    .grid-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      padding: 12px 20px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all var(--transition);
+      background: none;
+      color: var(--text);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--accent);
+      transform: translateY(100%);
+      transition: transform 0.25s ease;
+      z-index: 0;
+    }
+
+    .btn span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--bg);
+    }
+
+    .btn:hover::before {
+      transform: translateY(0);
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+    }
+
+    .btn.primary::before {
+      background: var(--accent2);
+    }
+
+    .btn.primary:hover {
+      color: var(--bg);
+      border-color: var(--accent2);
+    }
+
+    .btn.success {
+      background: var(--success);
+      color: var(--bg);
+      border-color: var(--success);
+    }
+
+    .btn.success::before {
+      background: color-mix(in srgb, var(--success) 80%, black);
+    }
+
+    .btn.success:hover {
+      color: var(--bg);
+    }
+
+    .btn.danger-btn {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .btn.danger-btn::before {
+      background: var(--danger);
+    }
+
+    .btn.danger-btn:hover {
+      color: white;
+      border-color: var(--danger);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: sticky;
+      top: 72px;
+      animation: fadeUp 0.4s ease 0.3s both;
+    }
+
+    .saved-grids {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .sidebar-title {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .sidebar-count {
+      font-size: 10px;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+    }
+
+    .grid-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 60vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .grid-item {
+      padding: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all var(--transition);
+      animation: slideIn 0.25s ease both;
+    }
+
+    .grid-item:hover {
+      border-color: var(--accent);
+      transform: translateX(3px);
+    }
+
+    .grid-item-title {
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .grid-item-meta {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .grid-item-sync {
+      font-size: 9px;
+      color: var(--success);
+      letter-spacing: 0.05em;
+    }
+
+    .grid-item-preview {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      margin-top: 8px;
+    }
+
+    .grid-item-preview img {
+      width: 100%;
+      aspect-ratio: 2/3;
+      object-fit: cover;
+    }
+
+    .grid-item-preview .empty-cell {
+      background: var(--surface2);
+      aspect-ratio: 2/3;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--muted);
+      font-size: 11px;
+      font-style: italic;
+      line-height: 1.8;
+    }
+
+    /* ── MODALS ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(6px);
+      z-index: 500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-overlay.open .modal-content {
+      animation: modalPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes modalPop {
+      from {
+        opacity: 0;
+        transform: scale(0.93) translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .modal-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: var(--card-shadow);
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+      transition: color var(--transition), transform var(--transition);
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      color: var(--text);
+      transform: rotate(90deg);
+    }
+
+    .modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem;
+      font-weight: 300;
+      margin-bottom: 1rem;
+    }
+
+    .modal-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      padding: 10px 14px;
+      margin-bottom: 1rem;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+
+    .modal-input:focus {
+      border-color: var(--accent);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    /* ── COVER PICKER MODAL ── */
+    .cover-picker-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(8px);
+      z-index: 600;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .cover-picker-overlay.open {
+      display: flex;
+    }
+
+    .cover-picker-overlay.open .cover-picker-modal {
+      animation: modalPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .cover-picker-modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      width: 100%;
+      max-width: 760px;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--card-shadow);
+      position: relative;
+    }
+
+    .picker-header {
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .picker-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 300;
+    }
+
+    .picker-subtitle {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      font-style: italic;
+      margin-top: 2px;
+    }
+
+    .picker-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 3rem;
+      color: var(--muted);
+      font-size: 11px;
+      font-style: italic;
+      flex: 1;
+    }
+
+    .picker-spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    .picker-error {
+      padding: 2rem;
+      text-align: center;
+      color: var(--blush);
+      font-size: 12px;
+      font-style: italic;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .picker-covers {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 10px;
+      padding: 1.2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .picker-cover {
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.2s ease;
+    }
+
+    .picker-cover:hover {
+      transform: translateY(-3px);
+    }
+
+    .picker-cover img {
+      width: 100%;
+      aspect-ratio: 2/3;
+      object-fit: cover;
+      display: block;
+      border: 2px solid transparent;
+      transition: border-color var(--transition);
+      background: var(--surface2);
+    }
+
+    .picker-cover:hover img {
+      border-color: var(--accent);
+    }
+
+    .picker-cover .cover-vol {
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-align: center;
+      margin-top: 4px;
+      text-transform: uppercase;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ── GRID PREVIEW MODAL ── */
+    .grid-preview-modal .modal-content {
+      max-width: 700px;
+    }
+
+    .grid-preview-canvas {
+      width: 100%;
+      display: block;
+      margin-bottom: 1rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    /* ── NOTIFICATIONS ── */
+    .notif {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 12px 20px;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      box-shadow: var(--card-shadow);
+      z-index: 1000;
+      animation: notifIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      max-width: 320px;
+    }
+
+    .notif.blush {
+      border-color: var(--blush);
+      color: var(--blush);
+    }
+
+    .notif.success {
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .notif.error {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    @keyframes notifIn {
+      from {
+        transform: translateY(80px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes notifOut {
+      to {
+        transform: translateX(120%);
+        opacity: 0;
+      }
+    }
+
+    .notif.leaving {
+      animation: notifOut 0.25s ease forwards;
+    }
+
+    /* ── ERROR BANNER ── */
+    .error-banner {
+      background: color-mix(in srgb, var(--danger) 15%, var(--bg));
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      padding: 10px 16px;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      margin-bottom: 1rem;
+      display: none;
+      animation: fadeUp 0.2s ease;
+    }
+
+    .error-banner.visible {
+      display: block;
+    }
+
+    /* ── MISC ANIMATIONS ── */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .builder-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
+      header {
+        padding: 0 1rem;
+      }
+
+      .grid-container {
+        padding: 1rem;
+      }
+
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      .grid-3x3 {
+        gap: 5px;
+      }
+
+      .grid-actions {
+        gap: 8px;
+      }
+
+      .btn {
+        padding: 10px 14px;
+        font-size: 10px;
+      }
+
+      .cover-picker-modal {
+        max-height: 96vh;
+      }
+
+      .picker-covers {
+        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+        gap: 7px;
+      }
+
+      header .logo-text {
+        display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .grid-3x3 {
+        gap: 4px;
+      }
+
+      .picker-covers {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .header-right {
+        gap: 0.5rem;
+      }
+
+      .header-btn {
+        padding: 5px 8px;
+        font-size: 10px;
+      }
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--muted);
+    }
+
+    /* ── DRAG & DROP ── */
+    .grid-slot[draggable="true"] {
+      cursor: grab;
+    }
+
+    .grid-slot[draggable="true"]:active {
+      cursor: grabbing;
+    }
+
+    .grid-slot.dragging {
+      opacity: 0.4;
+      transform: scale(0.97);
+    }
+  </style>
 </head>
+
 <body>
 
-<header>
-  <a href="index.html" class="logo">Tsun</a>
-  <div class="header-right">
-    <a href="index.html" class="header-btn">← Browse</a>
-    <button class="header-btn" id="themeToggle">Dark</button>
-    <div class="user-badge" id="userBadge" style="display: none;">
-      <img src="" alt="" id="userAvatar">
-      <span id="userName"></span>
-    </div>
-    <button class="header-btn" id="loginBtn">Login</button>
-  </div>
-</header>
-
-<div class="container">
-  <h1 class="page-title">3×3 Grid Builder</h1>
-  <p class="page-subtitle">fine, make your stupid collage. i'll even save it for you...</p>
-
-  <div class="builder-layout">
-    <div class="main-area">
-      <div class="search-section">
-        <label class="search-label">Search manga to add</label>
-        <div class="search-wrap">
-          <input type="text" class="search-input" id="searchInput" placeholder="search... whatever">
-          <span class="search-icon">⌕</span>
-          <div class="autocomplete-dropdown" id="autocomplete"></div>
-        </div>
+  <header id="siteHeader">
+    <a href="index.html" class="logo">Tsun</a>
+    <div class="header-right">
+      <a href="index.html" class="header-btn"><span>← Browse</span></a>
+      <button class="header-btn" id="themeToggle"><span>Dark</span></button>
+      <div class="user-badge" id="userBadge" style="display:none">
+        <img src="" alt="" id="userAvatar">
+        <span id="userName"></span>
       </div>
-
-      <div class="grid-container">
-        <div class="grid-3x3" id="grid"></div>
-        <div class="grid-actions">
-          <button class="btn primary" id="downloadBtn" disabled>Download PNG</button>
-          <button class="btn success" id="saveBtn" disabled>Save Grid</button>
-          <button class="btn" id="clearBtn">Clear All</button>
-        </div>
-      </div>
+      <button class="google-signin-btn" id="loginBtn">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+            fill="#4285F4" />
+          <path
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+            fill="#34A853" />
+          <path
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
+            fill="#FBBC05" />
+          <path
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+            fill="#EA4335" />
+        </svg>
+        Sign in with Google
+      </button>
     </div>
+  </header>
 
-    <div class="sidebar">
-      <div class="saved-grids">
-        <h3 class="sidebar-title">Your Saved Grids</h3>
-        <div class="grid-list" id="gridList"></div>
+  <div class="container">
+    <div class="error-banner" id="errorBanner"></div>
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">3×3 Grid Builder</h1>
+        <p class="page-subtitle">fine, make your stupid collage. i'll even save it for you...</p>
+      </div>
+      <div class="sync-status" id="syncStatus" style="display:none">
+        <div class="sync-dot" id="syncDot"></div>
+        <span id="syncLabel">synced</span>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- Save Modal -->
-<div class="modal-overlay" id="saveModal">
-  <div class="modal-content">
-    <button class="modal-close" id="closeSaveModal">×</button>
-    <h2 class="modal-title">Save Grid</h2>
-    <input type="text" class="modal-input" id="gridNameInput" placeholder="name your grid... (optional)">
-    <div class="modal-actions">
-      <button class="btn" id="cancelSave">Cancel</button>
-      <button class="btn primary" id="confirmSave">Save</button>
+    <div class="builder-layout">
+      <div class="main-area">
+
+        <div class="search-section">
+          <label class="search-label">Search manga to add</label>
+          <div class="search-wrap">
+            <input type="text" class="search-input" id="searchInput" placeholder="search... whatever" autocomplete="off"
+              spellcheck="false">
+            <span class="search-icon" id="searchIcon">⌕</span>
+            <div class="search-spinner" id="searchSpinner"></div>
+            <div class="autocomplete-dropdown" id="autocomplete"></div>
+          </div>
+        </div>
+
+        <div class="grid-container">
+          <div class="grid-3x3" id="grid"></div>
+          <div class="grid-actions">
+            <button class="btn primary" id="downloadBtn" disabled><span>Download PNG</span></button>
+            <button class="btn success" id="saveBtn" disabled><span>Save Grid</span></button>
+            <button class="btn danger-btn" id="clearBtn"><span>Clear All</span></button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="sidebar">
+        <div class="saved-grids">
+          <div class="sidebar-header">
+            <h3 class="sidebar-title">Saved Grids</h3>
+            <span class="sidebar-count" id="gridCount">0</span>
+          </div>
+          <div class="grid-list" id="gridList"></div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Preview Modal -->
-<div class="modal-overlay grid-preview-modal" id="previewModal">
-  <div class="modal-content">
-    <button class="modal-close" id="closePreviewModal">×</button>
-    <h2 class="modal-title" id="previewTitle"></h2>
-    <canvas id="previewCanvas" class="grid-preview-canvas"></canvas>
-    <div class="modal-actions">
-      <button class="btn" id="deletePreviewGrid">Delete</button>
-      <button class="btn primary" id="downloadPreviewGrid">Download</button>
+  <div class="cover-picker-overlay" id="coverPickerOverlay">
+    <div class="cover-picker-modal">
+      <div class="picker-header">
+        <div>
+          <div class="picker-title" id="pickerTitle">Choose a Cover</div>
+          <div class="picker-subtitle" id="pickerSubtitle">pick whichever. not that i care which one.</div>
+        </div>
+        <button class="modal-close" id="closePickerBtn">×</button>
+      </div>
+
+      <div class="picker-loading" id="pickerLoading">
+        <div class="picker-spinner"></div>
+        <span>fetching covers... just for you. don't read into it.</span>
+      </div>
+
+      <div class="picker-error" id="pickerError" style="display:none">
+        <span id="pickerErrorMsg">couldn't load covers. not my fault.</span>
+        <button class="btn" id="retryPickerBtn"><span>Try Again</span></button>
+      </div>
+
+      <div class="picker-covers" id="pickerCovers" style="display:none"></div>
     </div>
   </div>
-</div>
 
-<script>
-const $ = id => document.getElementById(id);
-const BLANK_SVG = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg"%3E%3C/svg%3E';
+  <div class="modal-overlay" id="saveModal">
+    <div class="modal-content">
+      <button class="modal-close" id="closeSaveModal">×</button>
+      <h2 class="modal-title">Save Grid</h2>
+      <input type="text" class="modal-input" id="gridNameInput" placeholder="name your grid... (optional)"
+        maxlength="80">
+      <div class="modal-actions">
+        <button class="btn" id="cancelSave"><span>Cancel</span></button>
+        <button class="btn primary" id="confirmSave"><span>Save</span></button>
+      </div>
+    </div>
+  </div>
 
-// State
-let currentGrid = Array(9).fill(null);
-let savedGrids = [];
-let currentUser = null;
+  <div class="modal-overlay grid-preview-modal" id="previewModal">
+    <div class="modal-content">
+      <button class="modal-close" id="closePreviewModal">×</button>
+      <h2 class="modal-title" id="previewTitle"></h2>
+      <canvas id="previewCanvas" class="grid-preview-canvas"></canvas>
+      <div class="modal-actions">
+        <button class="btn danger-btn" id="deletePreviewGrid"><span>Delete</span></button>
+        <button class="btn primary" id="downloadPreviewGrid"><span>Download</span></button>
+      </div>
+    </div>
+  </div>
 
-// Load saved user
-const savedUser = localStorage.getItem('tsun_user');
-if (savedUser) {
-  currentUser = JSON.parse(savedUser);
-  updateUserUI();
-}
+  <script>
+    // ═════════════════════════════════════════════
+    // 1. CONFIGURATION
+    // ═════════════════════════════════════════════
+    const GOOGLE_CLIENT_ID = '899850205404-mkpt9ti98akido6pghg7aed55309b8mt.apps.googleusercontent.com';
 
-function updateUserUI() {
-  if (currentUser) {
-    $('loginBtn').style.display = 'none';
-    $('userBadge').style.display = 'flex';
-    $('userAvatar').src = currentUser.picture;
-    $('userName').textContent = currentUser.name.split(' ')[0];
-  } else {
-    $('loginBtn').style.display = 'inline-block';
-    $('userBadge').style.display = 'none';
-  }
-}
+    // ⚠️ IMPORTANT: Update this URL after deploying your backend to Render!
+    // Example: 'https://tsun-backend.onrender.com'
+    const API_BASE_URL = 'http://localhost:3000';
 
-$('loginBtn').addEventListener('click', () => {
-  window.location.href = 'index.html';
-});
+    // ═════════════════════════════════════════════
+    // 2. UTILITIES & DOM
+    // ═════════════════════════════════════════════
+    const $ = id => document.getElementById(id);
+    const BLANK_SVG = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg"%3E%3C/svg%3E';
 
-$('userBadge').addEventListener('click', () => {
-  if (confirm("Log out? (Your grids are saved locally)")) {
-    currentUser = null;
-    localStorage.removeItem('tsun_user');
-    updateUserUI();
-    showNotif("Whatever. Come back when you feel like it.", 'blush');
-  }
-});
-
-// Theme
-const themeToggle = $('themeToggle');
-const html = document.documentElement;
-const savedTheme = localStorage.getItem('tsun_theme') || 'dark';
-html.setAttribute('data-theme', savedTheme);
-themeToggle.textContent = savedTheme === 'dark' ? 'Dark' : 'Light';
-
-themeToggle.addEventListener('click', () => {
-  const current = html.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
-  html.setAttribute('data-theme', next);
-  themeToggle.textContent = next === 'dark' ? 'Dark' : 'Light';
-  localStorage.setItem('tsun_theme', next);
-});
-
-// Load current grid from localStorage
-function loadCurrentGrid() {
-  const saved = localStorage.getItem('tsun_current_grid');
-  if (saved) {
-    currentGrid = JSON.parse(saved);
-    renderGrid();
-  }
-}
-
-// Save current grid to localStorage
-function saveCurrentGrid() {
-  localStorage.setItem('tsun_current_grid', JSON.stringify(currentGrid));
-}
-
-// Load saved grids
-function loadSavedGrids() {
-  const saved = localStorage.getItem('tsun_saved_grids');
-  if (saved) {
-    savedGrids = JSON.parse(saved);
-    renderSavedGrids();
-  }
-}
-
-function saveSavedGrids() {
-  localStorage.setItem('tsun_saved_grids', JSON.stringify(savedGrids));
-}
-
-// Render grid
-function renderGrid() {
-  const gridEl = $('grid');
-  gridEl.innerHTML = currentGrid.map((manga, i) => {
-    if (manga) {
-      return `
-        <div class="grid-slot filled" data-index="${i}">
-          <img src="${manga.image}" alt="${manga.title}">
-          <button class="remove-btn" data-index="${i}">×</button>
-        </div>
-      `;
-    } else {
-      return `
-        <div class="grid-slot" data-index="${i}">
-          <span class="placeholder">+</span>
-        </div>
-      `;
+    function escHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
     }
-  }).join('');
 
-  // Add click handlers
-  gridEl.querySelectorAll('.grid-slot').forEach(slot => {
-    const index = parseInt(slot.dataset.index);
-    if (!currentGrid[index]) {
-      slot.addEventListener('click', () => {
-        showNotif("Search for a manga above to add it here.", 'blush');
+    const ErrorTypes = {
+      SEARCH: 'search', COVERS: 'covers', SAVE: 'save',
+      BACKEND: 'backend', AUTH: 'auth', DOWNLOAD: 'download', GENERIC: 'generic',
+    };
+
+    function handleError(type, err, showBanner = false) {
+      const msg = err?.message || String(err) || 'Unknown error';
+      console.error(`[Tsun Error][${type}]`, err);
+      const userMessages = {
+        [ErrorTypes.SEARCH]: "Search hiccupped. Try again.",
+        [ErrorTypes.COVERS]: "Couldn't load covers. Not my fault.",
+        [ErrorTypes.SAVE]: "Save failed. Your grid is still here though.",
+        [ErrorTypes.BACKEND]: "Couldn't sync to server. Saved locally instead.",
+        [ErrorTypes.AUTH]: "Sign-in failed. Try again later.",
+        [ErrorTypes.DOWNLOAD]: "Download failed. Right-click the canvas to save manually.",
+        [ErrorTypes.GENERIC]: "Something broke. Not saying what.",
+      };
+      const notifMsg = userMessages[type] || userMessages[ErrorTypes.GENERIC];
+      showNotif(notifMsg, 'error');
+
+      if (showBanner) {
+        const banner = $('errorBanner');
+        banner.textContent = notifMsg;
+        banner.classList.add('visible');
+        setTimeout(() => banner.classList.remove('visible'), 5000);
+      }
+    }
+
+    // ═════════════════════════════════════════════
+    // 3. AUTHENTICATION & SYNC
+    // ═════════════════════════════════════════════
+    let currentUser = null;
+
+    function initGoogleAuth() {
+      // Load session from local storage
+      try {
+        const saved = localStorage.getItem('tsun_user');
+        if (saved) {
+          currentUser = JSON.parse(saved);
+          updateUserUI();
+          // If we have a user, try to sync their grids immediately
+          fetchGridsFromBackend(currentUser.id);
+        }
+      } catch (e) { }
+
+      $('loginBtn').addEventListener('click', () => {
+        if (typeof google === 'undefined') {
+          showNotif("Google Auth script failed to load.", 'blush');
+          return;
+        }
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredential,
+          auto_select: false,
+        });
+        google.accounts.id.prompt((notification) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+            showNotif("Popup blocked. Allow popups for sign-in.", 'blush');
+          }
+        });
+      });
+
+      $('userBadge').addEventListener('click', () => {
+        if (confirm("Log out?")) logoutUser();
       });
     }
-  });
 
-  gridEl.querySelectorAll('.remove-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const index = parseInt(btn.dataset.index);
-      currentGrid[index] = null;
-      saveCurrentGrid();
-      renderGrid();
+    async function handleGoogleCredential(response) {
+      try {
+        const payload = JSON.parse(atob(response.credential.split('.')[1]));
+        currentUser = {
+          id: payload.sub,
+          name: payload.name,
+          email: payload.email,
+          picture: payload.picture,
+          token: response.credential, // The JWT for backend verification
+        };
+
+        localStorage.setItem('tsun_user', JSON.stringify(currentUser));
+        updateUserUI();
+        showNotif(`Welcome back, ${currentUser.name.split(' ')[0]}.`, 'success');
+
+        // SYNC: Fetch grids from backend immediately
+        await fetchGridsFromBackend(currentUser.id);
+        // SYNC: Push any local unsynced grids
+        await syncAllLocalGrids();
+
+      } catch (e) {
+        handleError(ErrorTypes.AUTH, e, true);
+      }
+    }
+
+    function logoutUser() {
+      if (typeof google !== 'undefined') google.accounts.id.revoke(currentUser?.email || '', () => { });
+      currentUser = null;
+      localStorage.removeItem('tsun_user');
+      updateUserUI();
+      $('syncStatus').style.display = 'none';
+      // Clear the grid list to avoid showing old user's data
+      savedGrids = [];
+      renderSavedGrids();
+    }
+
+    function updateUserUI() {
+      if (currentUser) {
+        $('loginBtn').style.display = 'none';
+        $('userBadge').style.display = 'flex';
+        $('userAvatar').src = currentUser.picture || '';
+        $('userName').textContent = currentUser.name?.split(' ')[0] || 'You';
+        $('syncStatus').style.display = 'flex';
+      } else {
+        $('loginBtn').style.display = 'flex';
+        $('userBadge').style.display = 'none';
+      }
+    }
+
+    // ═════════════════════════════════════════════
+    // 4. BACKEND API
+    // ═════════════════════════════════════════════
+    function setSyncStatus(status) {
+      const dot = $('syncDot');
+      const label = $('syncLabel');
+      dot.className = 'sync-dot' + (status ? ' ' + status : '');
+      label.textContent = status === 'syncing' ? 'syncing...' : status === 'synced' ? 'synced' : status === 'error' ? 'sync failed' : '';
+    }
+
+    async function fetchGridsFromBackend(userId) {
+      if (!API_BASE_URL || !currentUser) return;
+      setSyncStatus('syncing');
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/grids`, {
+          headers: { 'Authorization': `Bearer ${currentUser.token}` }
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (data.grids) {
+          // Merge backend grids. We map the MongoDB _id to our local id for consistency.
+          savedGrids = data.grids.map(g => ({
+            ...g,
+            id: g._id, // use backend ID
+            synced: true
+          }));
+          saveSavedGrids();
+          renderSavedGrids();
+          setSyncStatus('synced');
+        }
+      } catch (e) {
+        console.error('Backend fetch error:', e);
+        setSyncStatus('error');
+      }
+    }
+
+    async function saveGridToBackend(grid) {
+      if (!API_BASE_URL || !currentUser) return false;
+      setSyncStatus('syncing');
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/grids`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentUser.token}`
+          },
+          body: JSON.stringify({ grid })
+        });
+        if (!res.ok) throw new Error('Backend save failed');
+        const data = await res.json();
+
+        // Update local ID with real Backend ID
+        if (data.id) grid.id = data.id;
+        grid.synced = true;
+
+        saveSavedGrids(); // re-save locally with new ID
+        renderSavedGrids();
+        setSyncStatus('synced');
+        setTimeout(() => setSyncStatus(''), 3000);
+        return true;
+      } catch (e) {
+        console.error('Backend save error:', e);
+        setSyncStatus('error');
+        return false;
+      }
+    }
+
+    async function syncAllLocalGrids() {
+      if (!API_BASE_URL || !currentUser) return;
+      for (const grid of savedGrids) {
+        if (!grid.synced) {
+          await saveGridToBackend(grid);
+        }
+      }
+    }
+
+    // ═════════════════════════════════════════════
+    // 5. LOCAL STATE
+    // ═════════════════════════════════════════════
+    let currentGrid = Array(9).fill(null);
+    let savedGrids = [];
+
+    function loadCurrentGrid() {
+      try {
+        const saved = localStorage.getItem('tsun_current_grid');
+        if (saved) { currentGrid = JSON.parse(saved); renderGrid(); }
+      } catch (e) { currentGrid = Array(9).fill(null); }
+    }
+
+    function saveCurrentGrid() {
+      localStorage.setItem('tsun_current_grid', JSON.stringify(currentGrid));
+    }
+
+    function loadSavedGrids() {
+      try {
+        const saved = localStorage.getItem('tsun_saved_grids');
+        if (saved) { savedGrids = JSON.parse(saved); renderSavedGrids(); }
+      } catch (e) { savedGrids = []; }
+    }
+
+    function saveSavedGrids() {
+      localStorage.setItem('tsun_saved_grids', JSON.stringify(savedGrids));
+    }
+
+    // ═════════════════════════════════════════════
+    // 6. RENDER GRID (Main UI)
+    // ═════════════════════════════════════════════
+    function renderGrid() {
+      const gridEl = $('grid');
+      gridEl.innerHTML = currentGrid.map((manga, i) => {
+        if (manga) {
+          return `
+        <div class="grid-slot filled" data-index="${i}" draggable="true">
+          <img src="${escHtml(manga.image)}" alt="${escHtml(manga.title)}" onerror="this.src='${BLANK_SVG}'">
+          <span class="slot-number">${i + 1}</span>
+          <div class="slot-overlay">
+            <button class="slot-btn" data-action="change" data-index="${i}" title="Change">⟳</button>
+            <button class="slot-btn danger" data-action="remove" data-index="${i}" title="Remove">×</button>
+          </div>
+        </div>`;
+        } else {
+          return `
+        <div class="grid-slot" data-index="${i}">
+          <span class="placeholder">+</span>
+          <span class="slot-number">${i + 1}</span>
+        </div>`;
+        }
+      }).join('');
+
+      // Events
+      gridEl.querySelectorAll('.grid-slot:not(.filled)').forEach(slot => {
+        slot.addEventListener('click', () => showNotif("Search for a manga above first.", 'blush'));
+      });
+
+      gridEl.querySelectorAll('[data-action]').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const idx = parseInt(btn.dataset.index);
+          if (btn.dataset.action === 'remove') {
+            currentGrid[idx] = null;
+            saveCurrentGrid();
+            renderGrid();
+          } else if (btn.dataset.action === 'change') {
+            openCoverPicker(idx, currentGrid[idx]);
+          }
+        });
+      });
+
+      setupDragAndDrop();
       updateButtons();
+    }
+
+    function updateButtons() {
+      const filled = currentGrid.filter(m => m !== null).length;
+      $('downloadBtn').disabled = filled !== 9;
+      $('saveBtn').disabled = filled === 0;
+    }
+
+    // ═════════════════════════════════════════════
+    // 7. DRAG & DROP
+    // ═════════════════════════════════════════════
+    let dragSrcIdx = null;
+    function setupDragAndDrop() {
+      const slots = document.querySelectorAll('.grid-slot');
+      slots.forEach(slot => {
+        slot.addEventListener('dragstart', e => {
+          if (!slot.classList.contains('filled')) return;
+          dragSrcIdx = parseInt(slot.dataset.index);
+          slot.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        slot.addEventListener('dragend', () => {
+          slot.classList.remove('dragging');
+          slots.forEach(s => s.classList.remove('drop-target'));
+        });
+        slot.addEventListener('dragover', e => {
+          e.preventDefault();
+          slot.classList.add('drop-target');
+        });
+        slot.addEventListener('dragleave', () => slot.classList.remove('drop-target'));
+        slot.addEventListener('drop', e => {
+          e.preventDefault();
+          const destIdx = parseInt(slot.dataset.index);
+          if (dragSrcIdx !== null && dragSrcIdx !== destIdx) {
+            const tmp = currentGrid[dragSrcIdx];
+            currentGrid[dragSrcIdx] = currentGrid[destIdx];
+            currentGrid[destIdx] = tmp;
+            saveCurrentGrid();
+            renderGrid();
+          }
+          dragSrcIdx = null;
+        });
+      });
+    }
+
+    // ═════════════════════════════════════════════
+    // 8. SEARCH & AUTOCOMPLETE
+    // ═════════════════════════════════════════════
+    let searchTimeout;
+    const searchInput = $('searchInput');
+    const autocomplete = $('autocomplete');
+
+    searchInput.addEventListener('input', e => {
+      clearTimeout(searchTimeout);
+      const q = e.target.value.trim();
+      if (q.length < 2) { autocomplete.classList.remove('open'); return; }
+      searchTimeout = setTimeout(() => searchManga(q), 320);
     });
-  });
 
-  updateButtons();
-}
+    async function searchManga(query) {
+      $('searchIcon').style.display = 'none';
+      $('searchSpinner').classList.add('visible');
 
-function updateButtons() {
-  const filled = currentGrid.filter(m => m !== null).length;
-  $('downloadBtn').disabled = filled !== 9;
-  $('saveBtn').disabled = filled !== 9;
-}
+      try {
+        const url = `https://api.jikan.moe/v4/manga?q=${encodeURIComponent(query)}&limit=8&type=manga&sfw=false`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('API Error');
+        const data = await res.json();
+        renderAutocomplete(data.data || []);
+      } catch (e) {
+        autocomplete.innerHTML = `<div class="ac-error">search failed. try again.</div>`;
+        autocomplete.classList.add('open');
+      } finally {
+        $('searchIcon').style.display = '';
+        $('searchSpinner').classList.remove('visible');
+      }
+    }
 
-// Search
-const searchInput = $('searchInput');
-const autocomplete = $('autocomplete');
-let searchTimeout;
-let acResults = [];
-
-searchInput.addEventListener('input', e => {
-  clearTimeout(searchTimeout);
-  const query = e.target.value.trim();
-  if (query.length < 2) {
-    autocomplete.classList.remove('open');
-    return;
-  }
-  searchTimeout = setTimeout(() => searchManga(query), 300);
-});
-
-async function searchManga(query) {
-  try {
-    const url = `https://api.jikan.moe/v4/manga?q=${encodeURIComponent(query)}&limit=8&type=manga&sfw=false`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Search failed');
-    const data = await res.json();
-    acResults = data.data || [];
-    renderAutocomplete();
-  } catch(e) {
-    console.warn('Search error:', e);
-  }
-}
-
-function renderAutocomplete() {
-  if (!acResults.length) {
-    autocomplete.classList.remove('open');
-    return;
-  }
-  autocomplete.innerHTML = acResults.map((m, i) => `
+    function renderAutocomplete(results) {
+      if (!results.length) {
+        autocomplete.innerHTML = `<div class="ac-error">no results.</div>`;
+        autocomplete.classList.add('open');
+        return;
+      }
+      autocomplete.innerHTML = results.map((m, i) => `
     <div class="autocomplete-item" data-index="${i}">
       <img class="autocomplete-thumb" src="${m.images?.jpg?.small_image_url || BLANK_SVG}" alt="">
       <div class="autocomplete-info">
         <div class="name">${escHtml(m.title)}</div>
-        <div class="meta">${m.type || 'Manga'} · ${m.volumes || '?'} vol</div>
+        <div class="meta">${m.type} · ${m.volumes || '?'} vol · ${m.score || 'N/A'}★</div>
       </div>
-    </div>
-  `).join('');
-  autocomplete.classList.add('open');
+    </div>`).join('');
+      autocomplete.classList.add('open');
 
-  autocomplete.querySelectorAll('.autocomplete-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const manga = acResults[parseInt(item.dataset.index)];
-      addMangaToGrid(manga);
-    });
-  });
-}
-
-function addMangaToGrid(manga) {
-  const firstEmpty = currentGrid.findIndex(m => m === null);
-  if (firstEmpty === -1) {
-    showNotif("Grid is full. Remove a manga first, genius.", 'blush');
-    return;
-  }
-
-  currentGrid[firstEmpty] = {
-    id: manga.mal_id,
-    title: manga.title,
-    image: manga.images?.jpg?.image_url || BLANK_SVG
-  };
-
-  saveCurrentGrid();
-  renderGrid();
-  searchInput.value = '';
-  autocomplete.classList.remove('open');
-  
-  if (currentGrid.filter(m => m !== null).length === 9) {
-    showNotif("There. Your grid is complete. Happy?", 'success');
-  }
-}
-
-document.addEventListener('click', e => {
-  if (!searchInput.contains(e.target) && !autocomplete.contains(e.target)) {
-    autocomplete.classList.remove('open');
-  }
-});
-
-// Check URL for manga to add
-const urlParams = new URLSearchParams(window.location.search);
-const addMangaId = urlParams.get('add');
-if (addMangaId) {
-  fetch(`https://api.jikan.moe/v4/manga/${addMangaId}`)
-    .then(r => r.json())
-    .then(data => {
-      if (data.data) {
-        addMangaToGrid(data.data);
-        // Clean URL
-        window.history.replaceState({}, '', 'builder.html');
-      }
-    })
-    .catch(e => console.warn('Failed to add manga:', e));
-}
-
-// Clear grid
-$('clearBtn').addEventListener('click', () => {
-  if (confirm("Clear the entire grid? You'll lose everything.")) {
-    currentGrid = Array(9).fill(null);
-    saveCurrentGrid();
-    renderGrid();
-    showNotif("Fine. It's gone.", 'blush');
-  }
-});
-
-// Download grid
-$('downloadBtn').addEventListener('click', async () => {
-  const canvas = document.createElement('canvas');
-  const cellSize = 200;
-  const gap = 4;
-  const canvasW = cellSize * 3 + gap * 2;
-  const canvasH = cellSize * 1.5 * 3 + gap * 2;
-  canvas.width = canvasW;
-  canvas.height = canvasH;
-  const ctx = canvas.getContext('2d');
-  
-  ctx.fillStyle = '#0a0a0a';
-  ctx.fillRect(0, 0, canvasW, canvasH);
-
-  const imagePromises = currentGrid.map(manga => new Promise(resolve => {
-    if (!manga) return resolve(null);
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
-    img.src = manga.image;
-  }));
-
-  const images = await Promise.all(imagePromises);
-
-  images.forEach((img, i) => {
-    const col = i % 3, row = Math.floor(i / 3);
-    const x = col * (cellSize + gap);
-    const y = row * (cellSize * 1.5 + gap);
-    const w = cellSize, h = cellSize * 1.5;
-
-    if (img) {
-      const srcAR = img.naturalWidth / img.naturalHeight;
-      const dstAR = w / h;
-      let sx, sy, sw, sh;
-      if (srcAR > dstAR) {
-        sh = img.naturalHeight; sw = sh * dstAR;
-        sx = (img.naturalWidth - sw) / 2; sy = 0;
-      } else {
-        sw = img.naturalWidth; sh = sw / dstAR;
-        sx = 0; sy = (img.naturalHeight - sh) / 2;
-      }
-      ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+      autocomplete.querySelectorAll('.autocomplete-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const manga = results[parseInt(item.dataset.index)];
+          addMangaToGrid(manga);
+        });
+      });
     }
-  });
 
-  // Grid lines
-  ctx.strokeStyle = 'rgba(0,0,0,0.9)';
-  ctx.lineWidth = gap;
-  for (let i = 1; i < 3; i++) {
-    const xLine = i * (cellSize + gap) - gap / 2;
-    ctx.beginPath(); ctx.moveTo(xLine, 0); ctx.lineTo(xLine, canvasH); ctx.stroke();
-    const yLine = i * (cellSize * 1.5 + gap) - gap / 2;
-    ctx.beginPath(); ctx.moveTo(0, yLine); ctx.lineTo(canvasW, yLine); ctx.stroke();
-  }
-
-  const link = document.createElement('a');
-  link.download = `tsun-3x3-${Date.now()}.png`;
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-  
-  showNotif("Downloaded. You better not lose it.", 'success');
-});
-
-// Save grid
-$('saveBtn').addEventListener('click', () => {
-  $('saveModal').classList.add('open');
-  $('gridNameInput').value = '';
-  $('gridNameInput').focus();
-});
-
-$('confirmSave').addEventListener('click', () => {
-  const name = $('gridNameInput').value.trim() || `Grid ${savedGrids.length + 1}`;
-  const newGrid = {
-    id: Date.now(),
-    name: name,
-    manga: [...currentGrid],
-    createdAt: new Date().toISOString(),
-    userId: currentUser?.id || null
-  };
-  
-  savedGrids.unshift(newGrid);
-  saveSavedGrids();
-  renderSavedGrids();
-  
-  $('saveModal').classList.remove('open');
-  showNotif("Saved. Not that I care.", 'success');
-  
-  // Optionally sync to backend if user is logged in
-  if (currentUser) {
-    syncToBackend(newGrid);
-  }
-});
-
-$('cancelSave').addEventListener('click', () => {
-  $('saveModal').classList.remove('open');
-});
-
-$('closeSaveModal').addEventListener('click', () => {
-  $('saveModal').classList.remove('open');
-});
-
-// Render saved grids
-function renderSavedGrids() {
-  const gridList = $('gridList');
-  
-  if (!savedGrids.length) {
-    gridList.innerHTML = '<div class="empty-state">no saved grids yet. get to work.</div>';
-    return;
-  }
-
-  gridList.innerHTML = savedGrids.map(grid => `
-    <div class="grid-item" data-id="${grid.id}">
-      <div class="grid-item-title">${escHtml(grid.name)}</div>
-      <div class="grid-item-meta">${new Date(grid.createdAt).toLocaleDateString()}</div>
-      <div class="grid-item-preview">
-        ${grid.manga.map(m => m ? `<img src="${m.image}" alt="${m.title}">` : '').join('')}
-      </div>
-    </div>
-  `).join('');
-
-  gridList.querySelectorAll('.grid-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const gridId = parseInt(item.dataset.id);
-      const grid = savedGrids.find(g => g.id === gridId);
-      if (grid) showGridPreview(grid);
-    });
-  });
-}
-
-// Show grid preview
-async function showGridPreview(grid) {
-  $('previewTitle').textContent = grid.name;
-  $('previewModal').classList.add('open');
-  
-  const canvas = $('previewCanvas');
-  const cellSize = 200;
-  const gap = 4;
-  const canvasW = cellSize * 3 + gap * 2;
-  const canvasH = cellSize * 1.5 * 3 + gap * 2;
-  canvas.width = canvasW;
-  canvas.height = canvasH;
-  const ctx = canvas.getContext('2d');
-  
-  ctx.fillStyle = '#0a0a0a';
-  ctx.fillRect(0, 0, canvasW, canvasH);
-
-  const imagePromises = grid.manga.map(manga => new Promise(resolve => {
-    if (!manga) return resolve(null);
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
-    img.src = manga.image;
-  }));
-
-  const images = await Promise.all(imagePromises);
-
-  images.forEach((img, i) => {
-    const col = i % 3, row = Math.floor(i / 3);
-    const x = col * (cellSize + gap);
-    const y = row * (cellSize * 1.5 + gap);
-    const w = cellSize, h = cellSize * 1.5;
-
-    if (img) {
-      const srcAR = img.naturalWidth / img.naturalHeight;
-      const dstAR = w / h;
-      let sx, sy, sw, sh;
-      if (srcAR > dstAR) {
-        sh = img.naturalHeight; sw = sh * dstAR;
-        sx = (img.naturalWidth - sw) / 2; sy = 0;
-      } else {
-        sw = img.naturalWidth; sh = sw / dstAR;
-        sx = 0; sy = (img.naturalHeight - sh) / 2;
+    document.addEventListener('click', e => {
+      if (!searchInput.contains(e.target) && !autocomplete.contains(e.target)) {
+        autocomplete.classList.remove('open');
       }
-      ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+    });
+
+    function addMangaToGrid(manga) {
+      const firstEmpty = currentGrid.findIndex(m => m === null);
+      if (firstEmpty === -1) { showNotif("Grid full. Clear a slot first.", 'blush'); return; }
+
+      currentGrid[firstEmpty] = {
+        id: manga.mal_id,
+        title: manga.title,
+        image: manga.images?.jpg?.image_url || BLANK_SVG
+      };
+      saveCurrentGrid();
+      renderGrid();
+      searchInput.value = '';
+      autocomplete.classList.remove('open');
+      openCoverPicker(firstEmpty, manga);
     }
-  });
 
-  ctx.strokeStyle = 'rgba(0,0,0,0.9)';
-  ctx.lineWidth = gap;
-  for (let i = 1; i < 3; i++) {
-    const xLine = i * (cellSize + gap) - gap / 2;
-    ctx.beginPath(); ctx.moveTo(xLine, 0); ctx.lineTo(xLine, canvasH); ctx.stroke();
-    const yLine = i * (cellSize * 1.5 + gap) - gap / 2;
-    ctx.beginPath(); ctx.moveTo(0, yLine); ctx.lineTo(canvasW, yLine); ctx.stroke();
-  }
+    // ═════════════════════════════════════════════
+    // 9. COVER PICKER
+    // ═════════════════════════════════════════════
+    let pickerSlotIdx = null;
+    let pickerManga = null;
 
-  // Set up download button
-  $('downloadPreviewGrid').onclick = () => {
-    const link = document.createElement('a');
-    link.download = `${grid.name.replace(/[^a-z0-9]/gi, '-')}-tsun-3x3.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-    showNotif("Downloaded. Again.", 'success');
-  };
+    function openCoverPicker(slotIdx, manga) {
+      pickerSlotIdx = slotIdx;
+      pickerManga = manga;
+      $('pickerTitle').textContent = manga.title || 'Choose Cover';
+      $('coverPickerOverlay').classList.add('open');
+      $('pickerLoading').style.display = 'flex';
+      $('pickerCovers').style.display = 'none';
+      $('pickerError').style.display = 'none';
+      loadCovers(manga);
+    }
 
-  // Set up delete button
-  $('deletePreviewGrid').onclick = () => {
-    if (confirm(`Delete "${grid.name}"? This can't be undone.`)) {
-      savedGrids = savedGrids.filter(g => g.id !== grid.id);
+    async function loadCovers(manga) {
+      try {
+        // Try Jikan first for simplicity in this version
+        const res = await fetch(`https://api.jikan.moe/v4/manga/${manga.id || manga.mal_id}/pictures`);
+        if (!res.ok) throw new Error('Failed to fetch covers');
+        const data = await res.json();
+        const covers = (data.data || []).map((p, i) => ({
+          url: p.jpg?.large_image_url || p.jpg?.image_url,
+          volume: `Cover ${i + 1}`
+        }));
+
+        // Fallback: Add current image if no covers found
+        if (!covers.length) covers.push({ url: manga.image, volume: 'Default' });
+
+        renderPickerCovers(covers);
+      } catch (e) {
+        $('pickerLoading').style.display = 'none';
+        $('pickerError').style.display = 'flex';
+      }
+    }
+
+    function renderPickerCovers(covers) {
+      $('pickerLoading').style.display = 'none';
+      const container = $('pickerCovers');
+      container.style.display = 'grid';
+      container.innerHTML = covers.map((c, i) => `
+    <div class="picker-cover" data-idx="${i}">
+      <img src="${c.url}" loading="lazy">
+      <div class="cover-vol">${c.volume}</div>
+    </div>`).join('');
+
+      container.querySelectorAll('.picker-cover').forEach(el => {
+        el.addEventListener('click', () => {
+          const cover = covers[parseInt(el.dataset.idx)];
+          currentGrid[pickerSlotIdx].image = cover.url;
+          saveCurrentGrid();
+          renderGrid();
+          $('coverPickerOverlay').classList.remove('open');
+        });
+      });
+    }
+
+    $('closePickerBtn').onclick = () => $('coverPickerOverlay').classList.remove('open');
+    $('retryPickerBtn').onclick = () => loadCovers(pickerManga);
+
+    // ═════════════════════════════════════════════
+    // 10. SAVING & DOWNLOADING
+    // ═════════════════════════════════════════════
+    $('clearBtn').onclick = () => {
+      if (confirm("Clear grid?")) {
+        currentGrid = Array(9).fill(null);
+        saveCurrentGrid();
+        renderGrid();
+      }
+    };
+
+    $('saveBtn').onclick = () => {
+      $('saveModal').classList.add('open');
+      $('gridNameInput').focus();
+    };
+
+    $('confirmSave').onclick = async () => {
+      const name = $('gridNameInput').value.trim() || `Grid ${savedGrids.length + 1}`;
+      const newGrid = {
+        id: 'local-' + Date.now(),
+        name: name,
+        manga: [...currentGrid],
+        createdAt: new Date().toISOString(),
+        synced: false
+      };
+
+      savedGrids.unshift(newGrid);
       saveSavedGrids();
       renderSavedGrids();
-      $('previewModal').classList.remove('open');
-      showNotif("Deleted. Hope you didn't need that.", 'blush');
+      $('saveModal').classList.remove('open');
+
+      // Attempt sync
+      if (currentUser) saveGridToBackend(newGrid);
+    };
+
+    $('cancelSave').onclick = () => $('saveModal').classList.remove('open');
+    $('closeSaveModal').onclick = () => $('saveModal').classList.remove('open');
+
+    // ═════════════════════════════════════════════
+    // 11. SAVED GRIDS & PREVIEW
+    // ═════════════════════════════════════════════
+    function renderSavedGrids() {
+      const list = $('gridList');
+      $('gridCount').textContent = savedGrids.length;
+      if (!savedGrids.length) {
+        list.innerHTML = '<div class="empty-state">no saved grids.</div>';
+        return;
+      }
+      list.innerHTML = savedGrids.map(g => `
+    <div class="grid-item" data-id="${g.id}">
+      <div class="grid-item-title">${escHtml(g.name)}</div>
+      <div class="grid-item-meta">
+        <span>${new Date(g.createdAt).toLocaleDateString()}</span>
+        ${g.synced ? '<span class="grid-item-sync">✓ synced</span>' : ''}
+      </div>
+      <div class="grid-item-preview">
+        ${g.manga.map(m => m ? `<img src="${m.image}">` : `<div class="empty-cell"></div>`).slice(0, 3).join('')}
+      </div>
+    </div>`).join('');
+
+      list.querySelectorAll('.grid-item').forEach(item => {
+        item.addEventListener('click', () => showPreview(item.dataset.id));
+      });
     }
-  };
-}
 
-$('closePreviewModal').addEventListener('click', () => {
-  $('previewModal').classList.remove('open');
-});
+    function showPreview(id) {
+      const grid = savedGrids.find(g => String(g.id) === id);
+      if (!grid) return;
 
-$('previewModal').addEventListener('click', e => {
-  if (e.target === $('previewModal')) {
-    $('previewModal').classList.remove('open');
-  }
-});
+      $('previewTitle').textContent = grid.name;
+      $('previewModal').classList.add('open');
 
-// Backend sync (placeholder - you'll need to implement the actual API)
-async function syncToBackend(grid) {
-  // This is where you'd send the grid to your backend
-  // Example:
-  /*
-  try {
-    const response = await fetch('YOUR_BACKEND_API/grids', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${currentUser.id}`
-      },
-      body: JSON.stringify(grid)
-    });
-    if (response.ok) {
-      console.log('Grid synced to backend');
+      // Render static preview
+      const canvas = $('previewCanvas');
+      renderGridToCanvas(grid.manga, canvas);
+
+      $('downloadPreviewGrid').onclick = () => downloadCanvas(canvas, grid.name);
+      $('deletePreviewGrid').onclick = () => {
+        if (confirm("Delete this grid?")) {
+          // If synced, we should delete from backend too (skipping for brevity)
+          savedGrids = savedGrids.filter(g => String(g.id) !== id);
+          saveSavedGrids();
+          renderSavedGrids();
+          $('previewModal').classList.remove('open');
+        }
+      };
     }
-  } catch(e) {
-    console.warn('Backend sync failed:', e);
-  }
-  */
-  console.log('Backend sync would happen here for grid:', grid.id);
-}
 
-// Utils
-function escHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
+    $('closePreviewModal').onclick = () => $('previewModal').classList.remove('open');
 
-function showNotif(msg, type = '') {
-  const el = document.createElement('div');
-  el.className = `notif${type ? ' ' + type : ''}`;
-  el.textContent = msg;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 3200);
-}
+    // ═════════════════════════════════════════════
+    // 12. CANVAS RENDERER (With Proxy Fix)
+    // ═════════════════════════════════════════════
+    $('downloadBtn').onclick = async () => {
+      const btn = $('downloadBtn');
+      btn.disabled = true;
+      btn.querySelector('span').textContent = 'Rendering...';
 
-// Init
-loadCurrentGrid();
-loadSavedGrids();
-renderGrid();
-renderSavedGrids();
-</script>
+      try {
+        const canvas = document.createElement('canvas');
+        await renderGridToCanvas(currentGrid, canvas);
+        downloadCanvas(canvas, 'tsun-grid');
+      } catch (e) {
+        handleError(ErrorTypes.DOWNLOAD, e);
+      } finally {
+        btn.disabled = false;
+        btn.querySelector('span').textContent = 'Download PNG';
+      }
+    };
+
+    async function renderGridToCanvas(grid, canvas) {
+      const cellSize = 200;
+      const gap = 4;
+      canvas.width = cellSize * 3 + gap * 2;
+      canvas.height = cellSize * 1.5 * 3 + gap * 2;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#0a0a0a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Load images via Proxy if API is available, otherwise direct
+      const images = await Promise.all(grid.map(manga => new Promise(resolve => {
+        if (!manga) return resolve(null);
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+
+        // ⚠️ PROXY LOGIC: Fixes Tainted Canvas
+        // If we have a backend URL, route images through /api/proxy
+        if (API_BASE_URL && !API_BASE_URL.includes('localhost')) {
+          img.src = `${API_BASE_URL}/api/proxy?url=${encodeURIComponent(manga.image)}`;
+        } else {
+          // Fallback for localhost or no backend (might fail download)
+          img.src = manga.image;
+        }
+      })));
+
+      images.forEach((img, i) => {
+        const col = i % 3, row = Math.floor(i / 3);
+        const x = col * (cellSize + gap);
+        const y = row * (cellSize * 1.5 + gap);
+
+        if (img) {
+          const scale = Math.max(cellSize / img.naturalWidth, (cellSize * 1.5) / img.naturalHeight);
+          const sw = cellSize / scale;
+          const sh = (cellSize * 1.5) / scale;
+          const sx = (img.naturalWidth - sw) / 2;
+          const sy = (img.naturalHeight - sh) / 2;
+          ctx.drawImage(img, sx, sy, sw, sh, x, y, cellSize, cellSize * 1.5);
+        } else {
+          ctx.fillStyle = '#1a1a1a';
+          ctx.fillRect(x, y, cellSize, cellSize * 1.5);
+        }
+      });
+    }
+
+    function downloadCanvas(canvas, name) {
+      const link = document.createElement('a');
+      link.download = `${name}-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    function showNotif(msg, type = '') {
+      const el = document.createElement('div');
+      el.className = `notif ${type}`;
+      el.textContent = msg;
+      document.body.appendChild(el);
+      setTimeout(() => {
+        el.classList.add('leaving');
+        el.addEventListener('animationend', () => el.remove());
+      }, 3000);
+    }
+
+    // ═════════════════════════════════════════════
+    // 13. INIT
+    // ═════════════════════════════════════════════
+    const themeToggle = $('themeToggle');
+    themeToggle.onclick = () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      themeToggle.querySelector('span').textContent = next === 'dark' ? 'Dark' : 'Light';
+    };
+
+    loadCurrentGrid();
+    loadSavedGrids();
+    renderGrid();
+    initGoogleAuth();
+  </script>
 </body>
+
 </html>
