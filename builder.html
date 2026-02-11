@@ -1776,7 +1776,8 @@
       if (!manga || !manga.id) return BLANK_SVG;
       const coverRel = manga.relationships?.find(rel => rel.type === 'cover_art');
       if (coverRel?.attributes?.fileName) {
-        return `https://uploads.mangadex.org/covers/${manga.id}/${coverRel.attributes.fileName}.512.jpg`;
+        const raw = `https://uploads.mangadex.org/covers/${manga.id}/${coverRel.attributes.fileName}.512.jpg`;
+        return `${API_BASE_URL}/api/proxy?url=${encodeURIComponent(raw)}`;
       }
       return BLANK_SVG;
     }
@@ -1863,10 +1864,13 @@
         const res = await fetch(`${API_BASE_URL || ''}/api/mangadex/cover?manga[]=${manga.id}&limit=100&order[volume]=asc`);
         if (!res.ok) throw new Error('Failed to fetch covers');
         const data = await res.json();
-        const covers = (data.data || []).map((cover, i) => ({
-          url: `https://uploads.mangadex.org/covers/${manga.id}/${cover.attributes.fileName}`,
-          volume: cover.attributes.volume || cover.attributes.description || `Cover ${i + 1}`
-        }));
+        const covers = (data.data || []).map((cover, i) => {
+          const raw = `https://uploads.mangadex.org/covers/${manga.id}/${cover.attributes.fileName}`;
+          return {
+            url: `${API_BASE_URL}/api/proxy?url=${encodeURIComponent(raw)}`,
+            volume: cover.attributes.volume || cover.attributes.description || `Cover ${i + 1}`
+          };
+        });
 
         // Fallback: Add current image if no covers found
         if (!covers.length) covers.push({ url: manga.image, volume: 'Default' });
