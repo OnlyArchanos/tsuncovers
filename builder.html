@@ -186,28 +186,6 @@
     }
 
     /* ── GOOGLE SIGN-IN ── */
-    .load-more-btn {
-      display: block;
-      width: 100%;
-      padding: 1.5rem;
-      margin-top: 1.5rem;
-      background: transparent;
-      border: 1px dashed var(--border);
-      color: var(--muted);
-      cursor: pointer;
-      font-family: 'DM Mono', monospace;
-      text-transform: uppercase;
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      transition: all 0.2s;
-    }
-
-    .load-more-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: color-mix(in srgb, var(--accent) 5%, transparent);
-    }
-
     .google-signin-btn {
       display: flex;
       align-items: center;
@@ -1423,21 +1401,14 @@
     const BLANK_SVG = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg"%3E%3C/svg%3E';
 
     // Batch image loader: loads images 5 at a time to respect rate limits
-    // Batch image loader: loads images 5 at a time to respect rate limits
     async function batchLoadImages(imgElements, batchSize = 5, delayMs = 150) {
-      // Add pulse class initially
-      imgElements.forEach(({ el }) => {
-        const img = el.tagName === 'IMG' ? el : el.querySelector('img');
-        if (img) img.classList.add('loading-pulse');
-      });
-
       for (let i = 0; i < imgElements.length; i += batchSize) {
         const batch = imgElements.slice(i, i + batchSize);
         await Promise.all(batch.map(({ el, url }) => new Promise(resolve => {
           const img = el.tagName === 'IMG' ? el : el.querySelector('img');
           if (!img) return resolve();
-          img.onload = () => { img.classList.remove('loading-pulse'); resolve(); };
-          img.onerror = () => { img.classList.remove('loading-pulse'); resolve(); };
+          img.onload = resolve;
+          img.onerror = resolve;
           img.src = url;
         })));
         if (i + batchSize < imgElements.length) {
@@ -1692,12 +1663,11 @@
     // ═════════════════════════════════════════════
     function renderGrid() {
       const gridEl = $('grid');
-      const batch = [];
       gridEl.innerHTML = currentGrid.map((manga, i) => {
         if (manga) {
           return `
         <div class="grid-slot filled" data-index="${i}" draggable="true">
-          <img src="${BLANK_SVG}" alt="${escHtml(manga.title)}" data-url="${escHtml(manga.image || '')}">
+          <img src="${escHtml(manga.image)}" alt="${escHtml(manga.title)}" onerror="this.src='${BLANK_SVG}'">
           <span class="slot-number">${i + 1}</span>
           <div class="slot-overlay">
             <button class="slot-btn" data-action="change" data-index="${i}" title="Change">⟳</button>
@@ -1712,13 +1682,6 @@
         </div>`;
         }
       }).join('');
-
-      // Batch load grid images
-      gridEl.querySelectorAll('.grid-slot.filled img').forEach(img => {
-        const url = img.dataset.url;
-        if (url) batch.push({ el: img, url });
-      });
-      if (batch.length) batchLoadImages(batch, 3, 100);
 
       // Events
       gridEl.querySelectorAll('.grid-slot:not(.filled)').forEach(slot => {
@@ -1918,10 +1881,6 @@
       loadCovers(manga);
     }
 
-    let currentCovers = [];
-    let displayedCoversCount = 0;
-    const COVERS_PER_PAGE = 40;
-
     async function loadCovers(manga) {
       try {
         // Paginate to fetch ALL covers (MangaDex max 100 per request)
@@ -1929,10 +1888,6 @@
         let offset = 0;
         const perPage = 100;
         let total = Infinity;
-
-        // Show loading state
-        $('pickerGrid').innerHTML = '<div class="loading-ring visible"></div>';
-
         while (offset < total) {
           const res = await fetch(`${API_BASE_URL || ''}/api/mangadex/cover?manga[]=${manga.id}&limit=${perPage}&offset=${offset}&order[volume]=asc`);
           if (!res.ok) throw new Error('Failed to fetch covers');
@@ -1953,69 +1908,33 @@
         // Fallback: Add current image if no covers found
         if (!allCovers.length) allCovers.push({ url: manga.image, volume: 'Default' });
 
-        currentCovers = allCovers;
-        displayedCoversCount = 0;
-        renderPickerCovers();
+        renderPickerCovers(allCovers);
       } catch (e) {
         $('pickerLoading').style.display = 'none';
         $('pickerError').style.display = 'flex';
       }
     }
 
-    function selectCover(idx) {
-      const cover = currentCovers[idx];
-      currentGrid[pickerSlotIdx].image = cover.url;
-      saveCurrentGrid();
-      renderGrid();
-      $('coverPickerOverlay').classList.remove('open');
-    }
+    function renderPickerCovers(covers) {
+      $('pickerLoading').style.display = 'none';
+      const container = $('pickerCovers');
+      container.style.display = 'grid';
+      container.innerHTML = covers.map((c, i) => `
+    <div class="picker-cover" data-idx="${i}">
+      <img src="${BLANK_SVG}" loading="lazy">
+      <div class="cover-vol">${c.volume}</div>
+    </div>`).join('');
 
-    function renderPickerCovers() {
-      const grid = $('pickerGrid');
-      if (displayedCoversCount === 0) grid.innerHTML = ''; // Clear only on initial load
-
-      const nextBatch = currentCovers.slice(displayedCoversCount, displayedCoversCount + COVERS_PER_PAGE);
-      const batchElements = [];
-
-      nextBatch.forEach((cover, idx) => {
-        const absIdx = displayedCoversCount + idx;
-        const div = document.createElement('div');
-        div.className = 'picker-item';
-        div.innerHTML = `
-          <img src="${BLANK_SVG}" loading="lazy">
-          <div class="picker-vol">${escHtml(cover.volume)}</div>
-        `;
-        div.onclick = () => selectCover(absIdx);
-        grid.appendChild(div);
-        batchElements.push({ el: div, url: cover.url });
+      container.querySelectorAll('.picker-cover').forEach(el => {
+        el.addEventListener('click', () => {
+          const cover = covers[parseInt(el.dataset.idx)];
+          currentGrid[pickerSlotIdx].image = cover.url;
+          saveCurrentGrid();
+          renderGrid();
+          $('coverPickerOverlay').classList.remove('open');
+        });
       });
 
-      displayedCoversCount += nextBatch.length;
-
-      // batch load images
-      if (batchElements.length) batchLoadImages(batchElements, 5, 150);
-
-      // Handle "Load More" button
-      let loadMoreBtn = $('loadMoreCoversBtn');
-      if (!loadMoreBtn) {
-        loadMoreBtn = document.createElement('button');
-        loadMoreBtn.id = 'loadMoreCoversBtn';
-        loadMoreBtn.className = 'load-more-btn';
-        loadMoreBtn.textContent = "There's more. Not that I'm excited to show you.";
-        loadMoreBtn.onclick = renderPickerCovers;
-        grid.parentNode.appendChild(loadMoreBtn); // Append after grid
-      }
-
-      // Toggle button visibility
-      if (displayedCoversCount < currentCovers.length) {
-        loadMoreBtn.style.display = 'block';
-        // Move to bottom
-        grid.parentNode.appendChild(loadMoreBtn);
-      } else {
-        loadMoreBtn.style.display = 'none';
-      }
-
-      $('pickerLoading').style.display = 'none';
       // Batch-load cover images 5 at a time
       const batch = covers.map((c, i) => ({
         el: container.querySelectorAll('.picker-cover')[i],
@@ -2085,7 +2004,7 @@
         ${g.synced ? '<span class="grid-item-sync">✓ synced</span>' : ''}
       </div>
       <div class="grid-item-preview">
-        ${g.manga.map(m => m ? `<img src="${BLANK_SVG}" data-url="${m.image || ''}">` : `<div class="empty-cell"></div>`).slice(0, 3).join('')}
+        ${g.manga.map(m => m ? `<img src="${m.image}">` : `<div class="empty-cell"></div>`).slice(0, 3).join('')}
       </div>
       <div class="grid-item-actions">
         <button class="btn btn-sm" onclick="event.stopPropagation(); loadGridToEditor('${g.id}')">Edit</button>
@@ -2096,14 +2015,6 @@
       list.querySelectorAll('.grid-item').forEach(item => {
         item.addEventListener('click', () => showPreview(item.dataset.id));
       });
-
-      // Batch load preview images
-      const batch = [];
-      list.querySelectorAll('.grid-item-preview img').forEach(img => {
-        const url = img.dataset.url;
-        if (url) batch.push({ el: img, url });
-      });
-      if (batch.length) batchLoadImages(batch, 5, 200);
     }
 
     function showPreview(id) {

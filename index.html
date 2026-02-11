@@ -1618,19 +1618,13 @@
     // ===================== BATCH IMAGE LOADER =====================
     // Loads images 5 at a time to respect rate limits and avoid proxy overload
     async function batchLoadImages(imgElements, batchSize = 5, delayMs = 150) {
-      // Add pulse class initially
-      imgElements.forEach(({ el }) => {
-        const img = el.tagName === 'IMG' ? el : el.querySelector('img');
-        if (img) img.classList.add('loading-pulse');
-      });
-
       for (let i = 0; i < imgElements.length; i += batchSize) {
         const batch = imgElements.slice(i, i + batchSize);
         await Promise.all(batch.map(({ el, url }) => new Promise(resolve => {
           const img = el.tagName === 'IMG' ? el : el.querySelector('img');
           if (!img) return resolve();
-          img.onload = () => { img.classList.remove('loading-pulse'); resolve(); };
-          img.onerror = () => { img.classList.remove('loading-pulse'); resolve(); };
+          img.onload = resolve;
+          img.onerror = resolve;
           img.src = url;
         })));
         if (i + batchSize < imgElements.length) {
