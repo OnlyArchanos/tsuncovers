@@ -11,7 +11,7 @@ app.use(express.json());
 // Allow Vercel frontend to talk to this backend
 app.use(cors({
     origin: '*', // We will tighten this later, but for now allow all to prevent errors
-    methods: ['GET', 'POST', 'OPTIONS']
+    methods: ['GET', 'POST', 'DELETE', 'OPTIONS']
 }));
 
 // 1. DATABASE CONNECTION
