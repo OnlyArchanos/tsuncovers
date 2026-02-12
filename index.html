@@ -894,7 +894,11 @@
     }
 
     .genre-card img.img-loading {
-      opacity: 0;
+      animation: shimmer 1.6s ease-in-out infinite;
+    }
+
+    .genre-card img.img-loaded {
+      animation: imgReveal 0.4s ease both;
     }
 
     .genre-card:hover img {
@@ -962,12 +966,28 @@
       }
 
       50% {
-        opacity: 0.7;
+        opacity: 0.75;
+      }
+    }
+
+    @keyframes imgReveal {
+      from {
+        opacity: 0.5;
+        transform: scale(1.02);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
       }
     }
 
     .img-loading {
-      opacity: 0 !important;
+      animation: shimmer 1.6s ease-in-out infinite !important;
+    }
+
+    .img-loaded {
+      animation: imgReveal 0.4s ease both !important;
     }
 
     .skeleton-card {
@@ -982,6 +1002,32 @@
 
     .cover-card img {
       transition: opacity 0.3s ease;
+      background: var(--surface);
+    }
+
+    .cover-card img.img-loading {
+      animation: shimmer 1.6s ease-in-out infinite;
+    }
+
+    .cover-card img.img-loaded {
+      animation: imgReveal 0.4s ease both;
+    }
+
+    /* STAGGER ENTRANCE */
+    @keyframes cardEnter {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .genre-card {
+      animation: cardEnter 0.3s ease both;
     }
 
     /* EMPTY STATE */
@@ -1623,17 +1669,17 @@
     // ===================== BATCH IMAGE LOADER =====================
     // Loads images 5 at a time to respect rate limits and avoid proxy overload
     async function batchLoadImages(imgElements, batchSize = 5, delayMs = 150) {
-      // Mark all images as loading (shows shimmer background, hides broken icon)
+      // Mark all images as loading (shows shimmer placeholder)
       imgElements.forEach(({ el }) => {
         const img = el.tagName === 'IMG' ? el : el.querySelector('img');
-        if (img) img.classList.add('img-loading');
+        if (img) { img.classList.add('img-loading'); img.classList.remove('img-loaded'); }
       });
       for (let i = 0; i < imgElements.length; i += batchSize) {
         const batch = imgElements.slice(i, i + batchSize);
         await Promise.all(batch.map(({ el, url }) => new Promise(resolve => {
           const img = el.tagName === 'IMG' ? el : el.querySelector('img');
           if (!img) return resolve();
-          img.onload = () => { img.classList.remove('img-loading'); resolve(); };
+          img.onload = () => { img.classList.remove('img-loading'); img.classList.add('img-loaded'); resolve(); };
           img.onerror = () => { img.classList.remove('img-loading'); resolve(); };
           img.src = url;
         })));
@@ -2096,7 +2142,7 @@
     const mangaRegistry = {};
 
     function renderCarouselItems(container, items) {
-      container.innerHTML = items.map(m => createCardHtml(m)).join('');
+      container.innerHTML = items.map((m, i) => createCardHtml(m, i)).join('');
       // Batch-load carousel images 5 at a time
       const cards = Array.from(container.querySelectorAll('.genre-card'));
       const batch = cards.map((card, i) => ({
@@ -2106,12 +2152,12 @@
       if (batch.length) batchLoadImages(batch, 5, 150);
     }
 
-    function createCardHtml(m) {
+    function createCardHtml(m, idx = 0) {
       const title = getMangaTitle(m);
       const isNSFW = m.attributes?.contentRating === 'pornographic';
       const titleStyle = isNSFW ? 'style="color: var(--blush);"' : '';
       mangaRegistry[m.id] = m;
-      return `<div class="genre-card" onclick="selectMangaById('${m.id}')"><img src="${BLANK_SVG}" loading="lazy"><div class="genre-card-title" ${titleStyle}>${escHtml(title)}</div></div>`;
+      return `<div class="genre-card" style="animation-delay:${idx * 0.05}s" onclick="selectMangaById('${m.id}')"><img src="${BLANK_SVG}" loading="lazy"><div class="genre-card-title" ${titleStyle}>${escHtml(title)}</div></div>`;
     }
 
     function selectMangaById(id) {
