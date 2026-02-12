@@ -894,11 +894,13 @@
     }
 
     .genre-card img.img-loading {
-      animation: shimmer 1.6s ease-in-out infinite;
+      background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.8s linear infinite;
     }
 
     .genre-card img.img-loaded {
-      animation: imgReveal 0.4s ease both;
+      animation: imgReveal 0.35s ease both;
     }
 
     .genre-card:hover img {
@@ -959,44 +961,43 @@
 
     /* SKELETON / LOADING SHIMMER */
     @keyframes shimmer {
-
-      0%,
-      100% {
-        opacity: 0.35;
+      0% {
+        background-position: -200% 0;
       }
 
-      50% {
-        opacity: 0.75;
+      100% {
+        background-position: 200% 0;
       }
     }
 
     @keyframes imgReveal {
       from {
-        opacity: 0.5;
-        transform: scale(1.02);
+        opacity: 0;
       }
 
       to {
         opacity: 1;
-        transform: scale(1);
       }
     }
 
     .img-loading {
-      animation: shimmer 1.6s ease-in-out infinite !important;
+      background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%) !important;
+      background-size: 200% 100% !important;
+      animation: shimmer 1.8s linear infinite !important;
     }
 
     .img-loaded {
-      animation: imgReveal 0.4s ease both !important;
+      animation: imgReveal 0.35s ease both !important;
     }
 
     .skeleton-card {
       width: 140px;
       aspect-ratio: 2/3;
-      background: var(--surface);
       flex-shrink: 0;
       scroll-snap-align: start;
-      animation: shimmer 1.6s ease-in-out infinite;
+      background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.8s linear infinite;
       box-shadow: var(--card-shadow);
     }
 
@@ -1006,11 +1007,13 @@
     }
 
     .cover-card img.img-loading {
-      animation: shimmer 1.6s ease-in-out infinite;
+      background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.8s linear infinite;
     }
 
     .cover-card img.img-loaded {
-      animation: imgReveal 0.4s ease both;
+      animation: imgReveal 0.35s ease both;
     }
 
     /* STAGGER ENTRANCE */

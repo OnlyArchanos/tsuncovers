@@ -998,43 +998,43 @@
 
     /* SHIMMER / LOADING */
     @keyframes shimmer {
-
-      0%,
-      100% {
-        opacity: 0.35;
+      0% {
+        background-position: -200% 0;
       }
 
-      50% {
-        opacity: 0.75;
+      100% {
+        background-position: 200% 0;
       }
     }
 
     @keyframes imgReveal {
       from {
-        opacity: 0.5;
-        transform: scale(1.02);
+        opacity: 0;
       }
 
       to {
         opacity: 1;
-        transform: scale(1);
       }
     }
 
     .img-loading {
-      animation: shimmer 1.6s ease-in-out infinite !important;
+      background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%) !important;
+      background-size: 200% 100% !important;
+      animation: shimmer 1.8s linear infinite !important;
     }
 
     .img-loaded {
-      animation: imgReveal 0.4s ease both !important;
+      animation: imgReveal 0.35s ease both !important;
     }
 
     .picker-cover.placeholder-shimmer img {
-      animation: shimmer 1.6s ease-in-out infinite;
+      background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.8s linear infinite;
     }
 
     .picker-cover img.img-loaded {
-      animation: imgReveal 0.4s ease both;
+      animation: imgReveal 0.35s ease both;
     }
 
     @keyframes cardEnter {
@@ -1463,7 +1463,7 @@
     // 2. UTILITIES & DOM
     // ═════════════════════════════════════════════
     const $ = id => document.getElementById(id);
-    const BLANK_SVG = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg"%3E%3C/svg%3E';
+    const BLANK_SVG = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22/%3E';
 
     // Batch image loader: loads images 5 at a time to respect rate limits
     async function batchLoadImages(imgElements, batchSize = 5, delayMs = 150) {
