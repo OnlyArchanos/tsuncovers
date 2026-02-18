@@ -2129,16 +2129,21 @@
 
       $('downloadPreviewGrid').onclick = () => downloadCanvas(canvas, grid.name);
       
-      $('cropBtn').onclick = () => {
-        const size = Math.min(canvas.width, canvas.height);
-        const crop = document.createElement('canvas');
-        crop.width = size;
-        crop.height = size;
-        crop.getContext('2d').drawImage(canvas, 
-          (canvas.width - size) / 2, (canvas.height - size) / 2, size, size, 
-          0, 0, size, size
-        );
-        downloadCanvas(crop, grid.name + '-cropped');
+      $('cropBtn').onclick = async () => {
+        const btn = $('cropBtn');
+        const oldText = btn.querySelector('span').textContent;
+        btn.disabled = true;
+        btn.querySelector('span').textContent = 'Generating...';
+        try {
+          const cropCanvas = document.createElement('canvas');
+          await renderGridToCanvas(grid.manga, cropCanvas, true);
+          downloadCanvas(cropCanvas, grid.name + '-square');
+        } catch (e) {
+          handleError(ErrorTypes.DOWNLOAD, e);
+        } finally {
+          btn.disabled = false;
+          btn.querySelector('span').textContent = oldText;
+        }
       };
       $('deletePreviewGrid').onclick = () => {
         if (confirm("Delete this grid?")) {
@@ -2173,11 +2178,12 @@
       }
     };
 
-    async function renderGridToCanvas(grid, canvas) {
+    async function renderGridToCanvas(grid, canvas, isSquare = false) {
       const cellSize = 200;
+      const cellHeight = isSquare ? cellSize : cellSize * 1.5;
       const gap = 4;
       canvas.width = cellSize * 3 + gap * 2;
-      canvas.height = cellSize * 1.5 * 3 + gap * 2;
+      canvas.height = cellHeight * 3 + gap * 2;
       const ctx = canvas.getContext('2d');
 
       ctx.fillStyle = '#0a0a0a';
@@ -2204,18 +2210,18 @@
       images.forEach((img, i) => {
         const col = i % 3, row = Math.floor(i / 3);
         const x = col * (cellSize + gap);
-        const y = row * (cellSize * 1.5 + gap);
+        const y = row * (cellHeight + gap);
 
         if (img) {
-          const scale = Math.max(cellSize / img.naturalWidth, (cellSize * 1.5) / img.naturalHeight);
+          const scale = Math.max(cellSize / img.naturalWidth, cellHeight / img.naturalHeight);
           const sw = cellSize / scale;
-          const sh = (cellSize * 1.5) / scale;
+          const sh = cellHeight / scale;
           const sx = (img.naturalWidth - sw) / 2;
           const sy = (img.naturalHeight - sh) / 2;
-          ctx.drawImage(img, sx, sy, sw, sh, x, y, cellSize, cellSize * 1.5);
+          ctx.drawImage(img, sx, sy, sw, sh, x, y, cellSize, cellHeight);
         } else {
           ctx.fillStyle = '#1a1a1a';
-          ctx.fillRect(x, y, cellSize, cellSize * 1.5);
+          ctx.fillRect(x, y, cellSize, cellHeight);
         }
       });
     }
