@@ -1442,6 +1442,7 @@
       <h2 class="modal-title" id="previewTitle"></h2>
       <canvas id="previewCanvas" class="grid-preview-canvas"></canvas>
       <div class="modal-actions">
+        <button class="btn" id="cropBtn" style="margin-right:auto; border-color:var(--accent); color:var(--accent)"><span>Crop for Discord</span></button>
         <button class="btn danger-btn" id="deletePreviewGrid"><span>Delete</span></button>
         <button class="btn primary" id="downloadPreviewGrid"><span>Download</span></button>
       </div>
@@ -2127,6 +2128,18 @@
       renderGridToCanvas(grid.manga, canvas);
 
       $('downloadPreviewGrid').onclick = () => downloadCanvas(canvas, grid.name);
+      
+      $('cropBtn').onclick = () => {
+        const size = Math.min(canvas.width, canvas.height);
+        const crop = document.createElement('canvas');
+        crop.width = size;
+        crop.height = size;
+        crop.getContext('2d').drawImage(canvas, 
+          (canvas.width - size) / 2, (canvas.height - size) / 2, size, size, 
+          0, 0, size, size
+        );
+        downloadCanvas(crop, grid.name + '-cropped');
+      };
       $('deletePreviewGrid').onclick = () => {
         if (confirm("Delete this grid?")) {
           // If synced, we should delete from backend too (skipping for brevity)
